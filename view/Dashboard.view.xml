@@ -1,0 +1,418 @@
+<mvc:View
+    controllerName="odata.metadata.manager.controller.Dashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    height="100%"
+    displayBlock="true">
+
+    <Page id="dashboardPage" showHeader="true" class="dashboardPage">
+
+        <!-- ═══════════════════════ TOP BAR ═══════════════════════ -->
+        <customHeader>
+            <Bar class="appTopBar">
+                <contentLeft>
+                    <core:Icon src="sap-icon://database" size="1.25rem" class="topBarIcon" />
+                    <Title text="OData Metadata Manager" class="topBarTitle" />
+                    <GenericTag
+                        text="Auto-scan: daily · last run 06:00"
+                        status="Information"
+                        class="autoScanChip" />
+                </contentLeft>
+                <contentRight>
+                    <Button
+                        id="btnExportAll"
+                        icon="sap-icon://table-view"
+                        text="Export all versions"
+                        class="topBarBtn"
+                        press="onExportAll" />
+                    <Button
+                        id="btnSchedule"
+                        icon="sap-icon://settings"
+                        text="Schedule"
+                        class="topBarBtn"
+                        press="onSchedule" />
+                    <Button
+                        id="btnRegister"
+                        icon="sap-icon://add"
+                        text="Register service"
+                        type="Emphasized"
+                        press="onRegisterService" />
+                </contentRight>
+            </Bar>
+        </customHeader>
+
+        <!-- ═══════════════════════ FILTER BAR ═══════════════════════ -->
+        <subHeader>
+            <Bar class="filterBar" id="filterBarContainer">
+                <contentLeft>
+                    <!-- Search -->
+                    <SearchField
+                        id="serviceSearch"
+                        placeholder="Search service name…"
+                        width="220px"
+                        liveChange="onSearchChange"
+                        class="filterSearch" />
+
+                    <!-- Type filter -->
+                    <Label text="Type" class="filterLabel" />
+                    <SegmentedButton
+                        id="typeFilter"
+                        selectedKey="All"
+                        selectionChange="onTypeFilterChange">
+                        <items>
+                            <SegmentedButtonItem key="All" text="All" />
+                            <SegmentedButtonItem key="V2"  text="V2" />
+                            <SegmentedButtonItem key="V4"  text="V4" />
+                        </items>
+                    </SegmentedButton>
+
+                    <!-- CDS Prefix filter -->
+                    <Label text="CDS prefix" class="filterLabel" />
+                    <SegmentedButton
+                        id="prefixFilter"
+                        selectedKey="All"
+                        selectionChange="onPrefixFilterChange">
+                        <items>
+                            <SegmentedButtonItem key="All" text="All" />
+                            <SegmentedButtonItem key="ZI"  text="ZI" />
+                            <SegmentedButtonItem key="ZC"  text="ZC" />
+                        </items>
+                    </SegmentedButton>
+
+                    <!-- Status filter -->
+                    <Label text="Status" class="filterLabel" />
+                    <Select id="statusFilter" change="onStatusFilterChange">
+                        <items>
+                            <core:Item key="All"      text="All statuses" />
+                            <core:Item key="Active"   text="Active" />
+                            <core:Item key="Inactive" text="Inactive" />
+                            <core:Item key="Archived" text="Archived" />
+                        </items>
+                    </Select>
+                </contentLeft>
+                <contentRight>
+                    <ToggleButton
+                        id="showDeletedToggle"
+                        text="Show deleted"
+                        icon="sap-icon://delete"
+                        press="onShowDeletedToggle" />
+                </contentRight>
+            </Bar>
+        </subHeader>
+
+        <!-- ═══════════════════════ MAIN BODY ═══════════════════════ -->
+        <content>
+            <HBox height="100%" class="mainBody" alignItems="Stretch">
+
+                <!-- ───── LEFT SIDEBAR ───── -->
+                <VBox class="serviceSidebar" id="serviceSidebar">
+                    <Toolbar class="sidebarHeader">
+                        <Title id="sidebarCount" text="6 services · 2 selected for compare" class="sidebarHeaderTitle" />
+                    </Toolbar>
+
+                    <List
+                        id="serviceList"
+                        mode="SingleSelectMaster"
+                        itemPress="onServiceSelect"
+                        class="serviceList"
+                        growing="false">
+
+                        <!-- ZMM_PURCHASE_SRV -->
+                        <StandardListItem
+                            id="svc_ZMM_PURCHASE_SRV"
+                            title="ZMM_PURCHASE_SRV"
+                            description="V2 · Active · ZI"
+                            info="7 versions"
+                            infoState="Success"
+                            press="onServicePress"
+                            class="serviceListItem"
+                            selected="true">
+                            <customData>
+                                <core:CustomData key="serviceId" value="ZMM_PURCHASE_SRV" />
+                            </customData>
+                        </StandardListItem>
+
+                        <!-- ZSD_SALES_ORDER_SRV -->
+                        <StandardListItem
+                            id="svc_ZSD_SALES_ORDER_SRV"
+                            title="ZSD_SALES_ORDER_SRV"
+                            description="V2 · Active · ZC"
+                            info="4 versions"
+                            infoState="Success"
+                            press="onServicePress"
+                            class="serviceListItem">
+                            <customData>
+                                <core:CustomData key="serviceId" value="ZSD_SALES_ORDER_SRV" />
+                            </customData>
+                        </StandardListItem>
+
+                        <!-- ZBTP_HR_EMPLOYEE -->
+                        <StandardListItem
+                            id="svc_ZBTP_HR_EMPLOYEE"
+                            title="ZBTP_HR_EMPLOYEE"
+                            description="V4 · Active · ZI"
+                            info="3 versions"
+                            infoState="Success"
+                            press="onServicePress"
+                            class="serviceListItem">
+                            <customData>
+                                <core:CustomData key="serviceId" value="ZBTP_HR_EMPLOYEE" />
+                            </customData>
+                        </StandardListItem>
+
+                        <!-- ZFI_INVOICE_API -->
+                        <StandardListItem
+                            id="svc_ZFI_INVOICE_API"
+                            title="ZFI_INVOICE_API"
+                            description="V4 · Active · ZC"
+                            info="5 versions"
+                            infoState="Success"
+                            press="onServicePress"
+                            class="serviceListItem">
+                            <customData>
+                                <core:CustomData key="serviceId" value="ZFI_INVOICE_API" />
+                            </customData>
+                        </StandardListItem>
+
+                        <!-- ZPP_PRODUCTION_SRV -->
+                        <StandardListItem
+                            id="svc_ZPP_PRODUCTION_SRV"
+                            title="ZPP_PRODUCTION_SRV"
+                            description="V2 · Inactive · ZI"
+                            info="2 versions"
+                            infoState="None"
+                            press="onServicePress"
+                            class="serviceListItem">
+                            <customData>
+                                <core:CustomData key="serviceId" value="ZPP_PRODUCTION_SRV" />
+                            </customData>
+                        </StandardListItem>
+
+                        <!-- ZLG_LEGACY_OBJ (deleted, hidden by default) -->
+                        <StandardListItem
+                            id="svc_ZLG_LEGACY_OBJ"
+                            title="ZLG_LEGACY_OBJ"
+                            description="is_deleted=true · V2 · ZI"
+                            info="Deleted"
+                            infoState="Error"
+                            visible="false"
+                            press="onServicePress"
+                            class="serviceListItem serviceListItem-deleted">
+                            <customData>
+                                <core:CustomData key="serviceId" value="ZLG_LEGACY_OBJ" />
+                            </customData>
+                        </StandardListItem>
+
+                    </List>
+                </VBox>
+
+                <!-- ───── RIGHT DETAIL PANEL ───── -->
+                <VBox class="detailPanel" id="detailPanel">
+
+                    <!-- Detail Header -->
+                    <HBox class="detailHeader" alignItems="Center">
+                        <core:Icon src="sap-icon://database" size="2rem" class="detailHeaderIcon" />
+                        <VBox class="detailHeaderText">
+                            <HBox alignItems="Center">
+                                <Title text="ZMM_PURCHASE_SRV" id="detailServiceName" class="detailServiceTitle" />
+                                <Text text="ZI" class="badge badge-zi detailPrefixBadge" />
+                                <Text text="V2" class="badge badge-v2 detailTypeBadge" />
+                                <Text text="Active" class="badge badge-active detailStatusBadge" />
+                            </HBox>
+                            <Text text="Namespace: SAP_MM_PUR · Package: ZMM_CORE · Owner: JDOE" id="detailSubtext" class="detailSubtext" />
+                        </VBox>
+                        <ToolbarSpacer />
+                        <HBox class="detailActions" alignItems="Center">
+                            <Button id="btnWorkflow" icon="sap-icon://workflow-tasks" text="Workflow" press="onWorkflow" />
+                            <Button id="btnCompare"  icon="sap-icon://compare"        text="Compare"  press="onNavigateCompare" />
+                            <Button id="btnSnapshot" icon="sap-icon://camera"         text="Snapshot" type="Emphasized" press="onTakeSnapshot" />
+                        </HBox>
+                    </HBox>
+
+                    <!-- Scheduler Warning Strip -->
+                    <MessageStrip
+                        id="schedulerStrip"
+                        text="Next auto-scan: tomorrow 06:00 · Schedule: daily on version table update · 7 versions stored (unlimited)"
+                        type="Warning"
+                        showIcon="true"
+                        showCloseButton="false"
+                        class="schedulerStrip">
+                        <link>
+                            <Link text="Configure" press="onConfigureScheduler" />
+                        </link>
+                    </MessageStrip>
+
+                    <!-- KPI Tiles -->
+                    <HBox class="kpiRow" justifyContent="SpaceBetween">
+                        <VBox class="kpiTile">
+                            <Text text="ENTITY TYPES" class="kpiLabel" />
+                            <Text text="14" class="kpiValue" />
+                            <Text text="+2 vs v1" class="kpi-delta kpi-delta-positive" />
+                        </VBox>
+                        <VBox class="kpiTile">
+                            <Text text="ASSOCIATIONS" class="kpiLabel" />
+                            <Text text="11" class="kpiValue" />
+                            <Text text="unchanged" class="kpi-delta kpi-delta-neutral" />
+                        </VBox>
+                        <VBox class="kpiTile">
+                            <Text text="NAV PROPERTIES" class="kpiLabel" />
+                            <Text text="32" class="kpiValue" />
+                            <Text text="+5 vs v1" class="kpi-delta kpi-delta-positive" />
+                        </VBox>
+                        <VBox class="kpiTile">
+                            <Text text="ACTIONS" class="kpiLabel" />
+                            <Text text="4" class="kpiValue" />
+                            <Text text="unchanged" class="kpi-delta kpi-delta-neutral" />
+                        </VBox>
+                    </HBox>
+
+                    <!-- Snapshots Section Header -->
+                    <Toolbar class="snapshotSectionHeader">
+                        <Title text="Versions &amp; Snapshots" class="snapshotSectionTitle" />
+                        <ToolbarSpacer />
+                        <Text text="7 stored · unlimited retention" class="snapshotMeta" />
+                    </Toolbar>
+
+                    <!-- Snapshots Scroll Container -->
+                    <ScrollContainer
+                        id="snapshotScroll"
+                        vertical="true"
+                        horizontal="false"
+                        class="snapshotScroll">
+
+                        <VBox class="snapshotList" id="snapshotListContainer">
+
+                            <!-- v7: Latest, Auto -->
+                            <VBox class="snapshotCard snapshotCard-latest" id="snapshotCard_v7">
+                                <HBox class="snapshotCardHeader" alignItems="Center">
+                                    <Text text="v7" class="snapshotVersion" />
+                                    <Text text="Latest" class="badge badge-latest" />
+                                    <Text text="🤖 Auto" class="badge badge-auto" />
+                                    <ToolbarSpacer />
+                                    <Text text="Today 06:00 · auto-scan" class="snapshotDate" />
+                                </HBox>
+                                <HBox class="snapshotMeta" alignItems="Center">
+                                    <core:Icon src="sap-icon://employee" size="0.75rem" />
+                                    <Text text="SYSTEM" class="snapshotMetaText" />
+                                    <Text text="·" class="snapshotDot" />
+                                    <Text text="TR#K9A002" class="snapshotMetaText snapshotTR" />
+                                    <Text text="·" class="snapshotDot" />
+                                    <Text text="App: ZMM_PURCHASE_UI" class="snapshotMetaText" />
+                                </HBox>
+                                <HBox class="snapshotActions">
+                                    <Button text="View"     icon="sap-icon://show"            class="snapshotBtn" press="onViewSnapshot">
+                                        <customData><core:CustomData key="version" value="v7" /></customData>
+                                    </Button>
+                                    <Button text="Download" icon="sap-icon://download"        class="snapshotBtn" press="onDownloadSnapshot" />
+                                    <Button text="Analyse"  icon="sap-icon://chart-bar-vertical" class="snapshotBtn" press="onAnalyseSnapshot" />
+                                    <Button text="Compare…" icon="sap-icon://compare"         class="snapshotBtn" press="onCompareSnapshot" />
+                                </HBox>
+                            </VBox>
+
+                            <!-- v6: Auto -->
+                            <VBox class="snapshotCard" id="snapshotCard_v6">
+                                <HBox class="snapshotCardHeader" alignItems="Center">
+                                    <Text text="v6" class="snapshotVersion" />
+                                    <Text text="🤖 Auto" class="badge badge-auto" />
+                                    <ToolbarSpacer />
+                                    <Text text="22 Mar 2025" class="snapshotDate" />
+                                </HBox>
+                                <HBox class="snapshotMeta" alignItems="Center">
+                                    <Text text="SYSTEM · TR#K9A001 · App: ZMM_PURCHASE_UI" class="snapshotMetaText" />
+                                </HBox>
+                                <HBox class="snapshotActions">
+                                    <Button text="View"     icon="sap-icon://show"     class="snapshotBtn" press="onViewSnapshot">
+                                        <customData><core:CustomData key="version" value="v6" /></customData>
+                                    </Button>
+                                    <Button text="Download" icon="sap-icon://download" class="snapshotBtn" press="onDownloadSnapshot" />
+                                    <Button text="Compare…" icon="sap-icon://compare"  class="snapshotBtn" press="onCompareSnapshot" />
+                                </HBox>
+                            </VBox>
+
+                            <!-- v5: Manual -->
+                            <VBox class="snapshotCard" id="snapshotCard_v5">
+                                <HBox class="snapshotCardHeader" alignItems="Center">
+                                    <Text text="v5" class="snapshotVersion" />
+                                    <Text text="👤 Manual" class="badge badge-manual" />
+                                    <ToolbarSpacer />
+                                    <Text text="10 Feb 2025" class="snapshotDate" />
+                                </HBox>
+                                <HBox class="snapshotMeta" alignItems="Center">
+                                    <Text text="JDOE · TR#K8X044 · SEGW: ZMM_PO_PROJ" class="snapshotMetaText" />
+                                </HBox>
+                                <HBox class="snapshotActions">
+                                    <Button text="View"     icon="sap-icon://show"     class="snapshotBtn" press="onViewSnapshot">
+                                        <customData><core:CustomData key="version" value="v5" /></customData>
+                                    </Button>
+                                    <Button text="Download" icon="sap-icon://download" class="snapshotBtn" press="onDownloadSnapshot" />
+                                    <Button text="Compare…" icon="sap-icon://compare"  class="snapshotBtn" press="onCompareSnapshot" />
+                                </HBox>
+                            </VBox>
+
+                            <!-- v4 -->
+                            <VBox class="snapshotCard" id="snapshotCard_v4">
+                                <HBox class="snapshotCardHeader" alignItems="Center">
+                                    <Text text="v4" class="snapshotVersion" />
+                                    <Text text="🤖 Auto" class="badge badge-auto" />
+                                    <ToolbarSpacer />
+                                    <Text text="15 Jan 2025" class="snapshotDate" />
+                                </HBox>
+                                <HBox class="snapshotMeta" alignItems="Center">
+                                    <Text text="SYSTEM · TR#K7W033 · App: ZMM_PURCHASE_UI" class="snapshotMetaText" />
+                                </HBox>
+                                <HBox class="snapshotActions">
+                                    <Button text="View"     icon="sap-icon://show"     class="snapshotBtn" press="onViewSnapshot" />
+                                    <Button text="Download" icon="sap-icon://download" class="snapshotBtn" press="onDownloadSnapshot" />
+                                    <Button text="Compare…" icon="sap-icon://compare"  class="snapshotBtn" press="onCompareSnapshot" />
+                                </HBox>
+                            </VBox>
+
+                            <!-- v3 -->
+                            <VBox class="snapshotCard" id="snapshotCard_v3">
+                                <HBox class="snapshotCardHeader" alignItems="Center">
+                                    <Text text="v3" class="snapshotVersion" />
+                                    <Text text="👤 Manual" class="badge badge-manual" />
+                                    <ToolbarSpacer />
+                                    <Text text="02 Dec 2024" class="snapshotDate" />
+                                </HBox>
+                                <HBox class="snapshotMeta" alignItems="Center">
+                                    <Text text="ASMITH · TR#K6V022 · SEGW: ZMM_PO_PROJ" class="snapshotMetaText" />
+                                </HBox>
+                                <HBox class="snapshotActions">
+                                    <Button text="View"     icon="sap-icon://show"     class="snapshotBtn" press="onViewSnapshot" />
+                                    <Button text="Download" icon="sap-icon://download" class="snapshotBtn" press="onDownloadSnapshot" />
+                                    <Button text="Compare…" icon="sap-icon://compare"  class="snapshotBtn" press="onCompareSnapshot" />
+                                </HBox>
+                            </VBox>
+
+                        </VBox>
+                    </ScrollContainer>
+
+                    <!-- Export Footer Bar -->
+                    <Bar class="exportFooterBar">
+                        <contentLeft>
+                            <core:Icon src="sap-icon://download" />
+                            <Text text="Aggregate export" class="exportFooterLabel" />
+                        </contentLeft>
+                        <contentRight>
+                            <Button
+                                text="All 7 versions as ZIP"
+                                icon="sap-icon://attachment-zip-file"
+                                press="onExportAllZip"
+                                class="exportBtn" />
+                            <Button
+                                text="Selected versions"
+                                icon="sap-icon://multi-select"
+                                press="onExportSelected"
+                                class="exportBtn" />
+                        </contentRight>
+                    </Bar>
+
+                </VBox>
+            </HBox>
+        </content>
+    </Page>
+</mvc:View>

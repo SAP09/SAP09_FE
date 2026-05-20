@@ -1,0 +1,248 @@
+<mvc:View
+    controllerName="odata.metadata.manager.controller.VersionCompare"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    height="100%"
+    displayBlock="true">
+
+    <Page id="comparePageRoot" showHeader="true" class="comparePage">
+
+        <!-- ═══════════════════════ TOP BAR ═══════════════════════ -->
+        <customHeader>
+            <Bar class="appTopBar">
+                <contentLeft>
+                    <Button icon="sap-icon://nav-back" press="onNavBack" class="backBtn" />
+                    <core:Icon src="sap-icon://compare" size="1.25rem" class="topBarIcon" />
+                    <Title text="Version comparison — ZMM_PURCHASE_SRV" class="topBarTitle" />
+                </contentLeft>
+                <contentRight>
+                    <Button icon="sap-icon://download" text="Export diff" press="onExportDiff" class="topBarBtn" />
+                    <Button icon="sap-icon://share-2"  text="Share"       press="onShareDiff"  class="topBarBtn" />
+                </contentRight>
+            </Bar>
+        </customHeader>
+
+        <content>
+            <VBox class="compareBody">
+
+                <!-- ═══════════════════ VERSION SELECTORS ═══════════════════ -->
+                <HBox class="versionSelectorRow" alignItems="Center" justifyContent="Center">
+
+                    <!-- BASE VERSION -->
+                    <VBox class="versionSelector" id="baseVersionSelector">
+                        <Text text="BASE VERSION" class="versionSelectorLabel" />
+                        <HBox alignItems="Center">
+                            <Text text="v5" id="baseVersionName" class="versionBig" />
+                            <Text text="👤 Manual" class="badge badge-manual" />
+                        </HBox>
+                        <Select id="baseVersionSelect" change="onBaseVersionChange" class="versionSelect">
+                            <items>
+                                <core:Item key="v1" text="v1 — Auto · Sep 2024" />
+                                <core:Item key="v2" text="v2 — Auto · Oct 2024" />
+                                <core:Item key="v3" text="v3 — Manual · Dec 2024" />
+                                <core:Item key="v4" text="v4 — Auto · Jan 2025" />
+                                <core:Item key="v5" text="v5 — Manual · Feb 2025" />
+                                <core:Item key="v6" text="v6 — Auto · Mar 2025" />
+                                <core:Item key="v7" text="v7 — Auto · Today" />
+                            </items>
+                        </Select>
+                        <Text text="JDOE · TR#K8X044 · SEGW: ZMM_PO_PROJ · 12 entities" id="baseVersionMeta" class="versionMeta" />
+                    </VBox>
+
+                    <!-- SWAP BUTTON -->
+                    <VBox class="swapBtnWrapper" justifyContent="Center" alignItems="Center">
+                        <Button
+                            id="swapBtn"
+                            icon="sap-icon://swap"
+                            type="Emphasized"
+                            class="swapBtn"
+                            press="onSwapVersions" />
+                    </VBox>
+
+                    <!-- COMPARE VERSION -->
+                    <VBox class="versionSelector" id="compareVersionSelector">
+                        <Text text="COMPARE VERSION" class="versionSelectorLabel" />
+                        <HBox alignItems="Center">
+                            <Text text="v7" id="compareVersionName" class="versionBig" />
+                            <Text text="🤖 Auto" class="badge badge-auto" />
+                        </HBox>
+                        <Select id="compareVersionSelect" change="onCompareVersionChange" class="versionSelect">
+                            <items>
+                                <core:Item key="v1" text="v1 — Auto · Sep 2024" />
+                                <core:Item key="v2" text="v2 — Auto · Oct 2024" />
+                                <core:Item key="v3" text="v3 — Manual · Dec 2024" />
+                                <core:Item key="v4" text="v4 — Auto · Jan 2025" />
+                                <core:Item key="v5" text="v5 — Manual · Feb 2025" />
+                                <core:Item key="v6" text="v6 — Auto · Mar 2025" />
+                                <core:Item key="v7" text="v7 — Auto · Today" />
+                            </items>
+                        </Select>
+                        <Text text="SYSTEM · TR#K9A002 · App: ZMM_PURCHASE_UI · 14 entities" id="compareVersionMeta" class="versionMeta" />
+                    </VBox>
+                </HBox>
+
+                <!-- ═══════════════════ DELTA SUMMARY ═══════════════════ -->
+                <HBox class="deltaSummaryBar" alignItems="Center">
+                    <HBox class="deltaPills" alignItems="Center">
+                        <Text text="+2 added"    class="deltaPill deltaPill-added"     id="pillAdded" />
+                        <Text text="−0 removed"  class="deltaPill deltaPill-removed"   id="pillRemoved" />
+                        <Text text="~3 changed"  class="deltaPill deltaPill-changed"   id="pillChanged" />
+                        <Text text="22 unchanged" class="deltaPill deltaPill-unchanged" id="pillUnchanged" />
+                    </HBox>
+                    <ToolbarSpacer />
+                    <Text text="v5 → v7 · 2 transports · app: ZMM_PURCHASE_UI" class="deltaInfo" id="deltaInfo" />
+                </HBox>
+
+                <!-- ═══════════════════ TABS ═══════════════════ -->
+                <IconTabBar
+                    id="compareTabBar"
+                    class="compareTabBar"
+                    select="onTabSwitch"
+                    expanded="true">
+
+                    <!-- ─── Structural diff tab ─── -->
+                    <items>
+                        <IconTabFilter text="Structural diff" key="structural" icon="sap-icon://tree">
+
+                            <!-- Two-column diff headers -->
+                            <HBox class="diffColHeaders">
+                                <Text text="v5 — base (12 entity types)"    class="diffColHeader diffColHeader-left" />
+                                <Text text="v7 — compare (14 entity types)" class="diffColHeader diffColHeader-right" />
+                            </HBox>
+
+                            <!-- Structural diff tree -->
+                            <ScrollContainer vertical="true" horizontal="false" class="structDiffScroll">
+                                <VBox id="structDiffContainer" class="structDiffContainer">
+
+                                    <!-- ── EntityTypes folder ── -->
+                                    <HBox class="diffFolderRow">
+                                        <HBox class="diffCell diffCell-left diffCell-folder">
+                                            <core:Icon src="sap-icon://folder" class="folderIcon" />
+                                            <Text text="EntityTypes" class="diffFolderLabel" />
+                                        </HBox>
+                                        <HBox class="diffCell diffCell-right diffCell-folder">
+                                            <core:Icon src="sap-icon://folder" class="folderIcon" />
+                                            <Text text="EntityTypes" class="diffFolderLabel" />
+                                        </HBox>
+                                    </HBox>
+
+                                    <!-- Unchanged items -->
+                                    <HBox class="diffItemRow"><HBox class="diffCell diffCell-left"><Text text="  PurchaseOrderSet" class="diffItemText" /></HBox><HBox class="diffCell diffCell-right"><Text text="  PurchaseOrderSet" class="diffItemText" /></HBox></HBox>
+                                    <HBox class="diffItemRow"><HBox class="diffCell diffCell-left"><Text text="  VendorSet" class="diffItemText" /></HBox><HBox class="diffCell diffCell-right"><Text text="  VendorSet" class="diffItemText" /></HBox></HBox>
+                                    <HBox class="diffItemRow"><HBox class="diffCell diffCell-left"><Text text="  MaterialSet" class="diffItemText" /></HBox><HBox class="diffCell diffCell-right"><Text text="  MaterialSet" class="diffItemText" /></HBox></HBox>
+
+                                    <!-- Changed: PartnerSet → BusinessPartnerSet -->
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-changed"><Text text="~ PartnerSet" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-changed"><Text text="~ BusinessPartnerSet" class="diffItemText" /></HBox>
+                                    </HBox>
+
+                                    <!-- Changed: Vendor MaxLength -->
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-changed"><Text text="~ Vendor MaxLength=&quot;10&quot;" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-changed"><Text text="~ Vendor MaxLength=&quot;20&quot;" class="diffItemText" /></HBox>
+                                    </HBox>
+
+                                    <!-- Changed: Quantity Scale -->
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-changed"><Text text="~ Quantity Scale=&quot;3&quot;" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-changed"><Text text="~ Quantity Scale=&quot;6&quot;" class="diffItemText" /></HBox>
+                                    </HBox>
+
+                                    <!-- Added in v7 -->
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-empty"><Text text="" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-added"><Text text="+ ApprovalStepSet" class="diffItemText" /></HBox>
+                                    </HBox>
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-empty"><Text text="" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-added"><Text text="+ AddressSet" class="diffItemText" /></HBox>
+                                    </HBox>
+
+                                    <!-- ── Associations folder ── -->
+                                    <HBox class="diffFolderRow">
+                                        <HBox class="diffCell diffCell-left diffCell-folder">
+                                            <core:Icon src="sap-icon://folder" class="folderIcon" />
+                                            <Text text="Associations" class="diffFolderLabel" />
+                                        </HBox>
+                                        <HBox class="diffCell diffCell-right diffCell-folder">
+                                            <core:Icon src="sap-icon://folder" class="folderIcon" />
+                                            <Text text="Associations" class="diffFolderLabel" />
+                                        </HBox>
+                                    </HBox>
+
+                                    <HBox class="diffItemRow"><HBox class="diffCell diffCell-left"><Text text="  PO_Items_Assoc" class="diffItemText" /></HBox><HBox class="diffCell diffCell-right"><Text text="  PO_Items_Assoc" class="diffItemText" /></HBox></HBox>
+                                    <HBox class="diffItemRow"><HBox class="diffCell diffCell-left"><Text text="  PO_Partner_Assoc" class="diffItemText" /></HBox><HBox class="diffCell diffCell-right"><Text text="  PO_Partner_Assoc" class="diffItemText" /></HBox></HBox>
+
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-empty"><Text text="" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-added"><Text text="+ PO_Address_Assoc" class="diffItemText" /></HBox>
+                                    </HBox>
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-empty"><Text text="" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-added"><Text text="+ PO_Approval_Assoc" class="diffItemText" /></HBox>
+                                    </HBox>
+
+                                    <!-- ── FunctionImports folder ── -->
+                                    <HBox class="diffFolderRow">
+                                        <HBox class="diffCell diffCell-left diffCell-folder">
+                                            <core:Icon src="sap-icon://folder" class="folderIcon" />
+                                            <Text text="FunctionImports" class="diffFolderLabel" />
+                                        </HBox>
+                                        <HBox class="diffCell diffCell-right diffCell-folder">
+                                            <core:Icon src="sap-icon://folder" class="folderIcon" />
+                                            <Text text="FunctionImports" class="diffFolderLabel" />
+                                        </HBox>
+                                    </HBox>
+
+                                    <HBox class="diffItemRow"><HBox class="diffCell diffCell-left"><Text text="  GetOpenOrders" class="diffItemText" /></HBox><HBox class="diffCell diffCell-right"><Text text="  GetOpenOrders" class="diffItemText" /></HBox></HBox>
+                                    <HBox class="diffItemRow"><HBox class="diffCell diffCell-left"><Text text="  ConfirmDelivery" class="diffItemText" /></HBox><HBox class="diffCell diffCell-right"><Text text="  ConfirmDelivery" class="diffItemText" /></HBox></HBox>
+
+                                    <HBox class="diffItemRow">
+                                        <HBox class="diffCell diffCell-left diff-empty"><Text text="" class="diffItemText" /></HBox>
+                                        <HBox class="diffCell diffCell-right diff-added"><Text text="+ GetApprovalStatus" class="diffItemText" /></HBox>
+                                    </HBox>
+
+                                </VBox>
+                            </ScrollContainer>
+                        </IconTabFilter>
+
+                        <!-- ─── XML diff tab ─── -->
+                        <IconTabFilter text="XML diff" key="xmldiff" icon="sap-icon://source-code">
+                            <HBox class="diffColHeaders">
+                                <Text text="v5 — base"    class="diffColHeader diffColHeader-left" />
+                                <Text text="v7 — compare" class="diffColHeader diffColHeader-right" />
+                            </HBox>
+
+                            <ScrollContainer vertical="true" horizontal="false" class="xmlDiffScroll">
+                                <VBox id="xmlDiffContainer" class="xmlDiffContainer" />
+                            </ScrollContainer>
+                        </IconTabFilter>
+                    </items>
+                </IconTabBar>
+
+            </VBox>
+        </content>
+
+        <!-- ═══════════════════════ LEGEND FOOTER ═══════════════════════ -->
+        <footer>
+            <Bar class="legendBar">
+                <contentLeft>
+                    <HBox alignItems="Center" class="legendPills">
+                        <Text text="+" class="legendPill legendPill-added" />
+                        <Text text="added" class="legendText" />
+                        <Text text="−" class="legendPill legendPill-removed" />
+                        <Text text="removed" class="legendText" />
+                        <Text text="~" class="legendPill legendPill-changed" />
+                        <Text text="changed" class="legendText" />
+                    </HBox>
+                </contentLeft>
+                <contentRight>
+                    <Text text="Transport diff: v5=TR#K8X044 · v7=TR#K9A002 · triggering app: ZMM_PURCHASE_UI" class="legendTransport" />
+                </contentRight>
+            </Bar>
+        </footer>
+    </Page>
+</mvc:View>

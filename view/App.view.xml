@@ -1,0 +1,7 @@
+<mvc:View
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    height="100%"
+    displayBlock="true">
+    <NavContainer id="navContainer" height="100%" width="100%" />
+</mvc:View>

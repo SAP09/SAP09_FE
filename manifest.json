@@ -1,0 +1,74 @@
+{
+    "_version": "1.59.0",
+    "sap.app": {
+        "id": "odata.metadata.manager",
+        "type": "application",
+        "title": "OData Metadata Manager",
+        "description": "Manage, compare and snapshot OData service metadata versions",
+        "applicationVersion": { "version": "1.0.0" },
+        "dataSources": {}
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "sap-icon://database",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": false
+        },
+        "supportedThemes": ["sap_horizon", "sap_fiori_3"]
+    },
+    "sap.ui5": {
+        "rootView": {
+            "viewName": "odata.metadata.manager.view.App",
+            "type": "XML",
+            "id": "app"
+        },
+        "dependencies": {
+            "minUI5Version": "1.120.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.layout": {},
+                "sap.f": {},
+                "sap.ui.unified": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "": {
+                "type": "sap.ui.model.json.JSONModel",
+                "settings": { "defaultBindingMode": "TwoWay" }
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "viewType": "XML",
+                "path": "odata.metadata.manager.view",
+                "controlId": "navContainer",
+                "controlAggregation": "pages",
+                "async": true
+            },
+            "routes": [
+                { "name": "dashboard",      "pattern": "",                           "target": ["dashboard"]       },
+                { "name": "versionCompare", "pattern": "compare/{service}",          "target": ["versionCompare"]  },
+                { "name": "snapshotDetail", "pattern": "snapshot/{service}/{version}","target": ["snapshotDetail"]  }
+            ],
+            "targets": {
+                "dashboard":      { "viewType": "XML", "viewName": "Dashboard",      "viewId": "dashboard"      },
+                "versionCompare": { "viewType": "XML", "viewName": "VersionCompare", "viewId": "versionCompare" },
+                "snapshotDetail": { "viewType": "XML", "viewName": "SnapshotDetail", "viewId": "snapshotDetail" }
+            }
+        }
+    }
+}
