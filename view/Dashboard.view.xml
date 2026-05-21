@@ -228,7 +228,6 @@
                         <HBox class="detailActions" alignItems="Center">
                             <Button id="btnWorkflow" icon="sap-icon://workflow-tasks" text="Workflow" press="onWorkflow" />
                             <Button id="btnCompare"  icon="sap-icon://compare"        text="Compare"  press="onNavigateCompare" />
-                            <Button id="btnSnapshot" icon="sap-icon://camera"         text="Snapshot" type="Emphasized" press="onTakeSnapshot" />
                         </HBox>
                     </HBox>
 
