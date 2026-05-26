@@ -1,71 +1,377 @@
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-.cmp{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary);font-size:13px}
-.bar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
-.bar-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
-.btn{font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
-.btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
-.ml{margin-left:auto}
-.ver-selectors{display:grid;grid-template-columns:1fr 40px 1fr;align-items:center;gap:0;border-bottom:0.5px solid var(--color-border-tertiary)}
-.ver-sel{padding:10px 16px;display:flex;flex-direction:column;gap:3px}
-.ver-sel:first-child{border-right:0.5px solid var(--color-border-tertiary)}
-.ver-label{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
-.ver-pick{display:flex;align-items:center;gap:8px}
-.ver-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
-.ver-meta{font-size:11px;color:var(--color-text-tertiary)}
-.badge{font-size:10px;padding:1px 6px;border-radius:var(--border-radius-md);font-weight:500}
-.bauto{background:#FAEEDA;color:#633806}
-.bman{background:#F1EFE8;color:#5F5E5A}
-.swap-btn{display:flex;justify-content:center;align-items:center}
-.delta-bar{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:11px}
-.delta-pill{padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500}
-.add{background:#EAF3DE;color:#27500A}.rem{background:#FCEBEB;color:#791F1F}.chg{background:#FAEEDA;color:#633806}.same{background:#F1EFE8;color:#5F5E5A}
-.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);padding:0 16px}
-.tab{font-size:12px;padding:8px 14px;cursor:pointer;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px}
-.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
-.diff-area{display:grid;grid-template-columns:1fr 1fr;max-height:340px;overflow-y:auto}
-.diff-col{overflow:hidden}
-.diff-col-head{padding:6px 14px;font-size:11px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);position:sticky;top:0;z-index:1}
-.diff-col:first-child{border-right:0.5px solid var(--color-border-tertiary)}
-.diff-line{display:flex;gap:0;font-family:var(--font-mono);font-size:11px;line-height:1.6;padding:0 10px;white-space:pre}
-.diff-line.added{background:#EAF3DE}
-.diff-line.removed{background:#FCEBEB}
-.diff-line.changed{background:#FAEEDA}
-.diff-line.empty{background:var(--color-background-secondary);color:transparent;user-select:none}
-.ln{min-width:28px;color:var(--color-text-tertiary);font-size:10px;text-align:right;padding-right:8px;flex-shrink:0;line-height:1.6}
-.sym{min-width:14px;flex-shrink:0;line-height:1.6;font-weight:500}
-.added .sym{color:#3B6D11}.removed .sym{color:#A32D2D}.changed .sym{color:#854F0B}
-.xc{flex:1;overflow:hidden;text-overflow:ellipsis;color:var(--color-text-primary)}
-.struct-area{display:grid;grid-template-columns:1fr 1fr;max-height:340px;overflow-y:auto}
-.struct-col{padding:12px 16px}
-.struct-col:first-child{border-right:0.5px solid var(--color-border-tertiary)}
-.struct-col-head{padding:6px 16px;font-size:11px;font-weight:500;color:var(--color-text-secondary);background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);position:sticky;top:0}
-.tree-node{padding:3px 0;font-size:12px;color:var(--color-text-primary);display:flex;align-items:center;gap:5px}
-.tree-node.indent1{padding-left:16px}
-.tree-node.indent2{padding-left:32px}
-.tree-node.indent3{padding-left:48px}
-.tree-node.added{color:#3B6D11;background:#EAF3DE;border-radius:4px;padding-left:4px}
-.tree-node.removed{color:#A32D2D;background:#FCEBEB;border-radius:4px;padding-left:4px}
-.tree-node.changed{color:#854F0B;background:#FAEEDA;border-radius:4px;padding-left:4px}
-.tree-node.indent1.added,.tree-node.indent1.removed,.tree-node.indent1.changed{padding-left:20px}
-.tree-node.indent2.added,.tree-node.indent2.removed,.tree-node.indent2.changed{padding-left:36px}
-.legend{display:flex;gap:10px;padding:8px 16px;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:11px;color:var(--color-text-secondary);align-items:center}
-@media(prefers-color-scheme:dark){
-  .bauto{background:#633806;color:#FAC775}.bman{background:#444441;color:#B4B2A9}
-  .add{background:#27500A;color:#C0DD97}.rem{background:#791F1F;color:#F7C1C1}.chg{background:#633806;color:#FAC775}.same{background:#444441;color:#B4B2A9}
-  .diff-line.added{background:#27500A22}.diff-line.removed{background:#791F1F22}.diff-line.changed{background:#63380622}
-  .tree-node.added{background:#27500A22;color:#97C459}.tree-node.removed{background:#791F1F22;color:#F09595}.tree-node.changed{background:#63380622;color:#EF9F27}
-}
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  .cmp {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    background: var(--color-background-primary);
+    font-size: 13px;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: var(--color-background-secondary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .bar-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+  .btn {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn:hover {
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+  }
+  .ml {
+    margin-left: auto;
+  }
+  .ver-selectors {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    align-items: center;
+    gap: 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .ver-sel {
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .ver-sel:first-child {
+    border-right: 0.5px solid var(--color-border-tertiary);
+  }
+  .ver-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .ver-pick {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ver-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+  .ver-meta {
+    font-size: 11px;
+    color: var(--color-text-tertiary);
+  }
+  .badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: var(--border-radius-md);
+    font-weight: 500;
+  }
+  .bauto {
+    background: #faeeda;
+    color: #633806;
+  }
+  .bman {
+    background: #f1efe8;
+    color: #5f5e5a;
+  }
+  .swap-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .delta-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    background: var(--color-background-secondary);
+    font-size: 11px;
+  }
+  .delta-pill {
+    padding: 2px 8px;
+    border-radius: var(--border-radius-md);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .add {
+    background: #eaf3de;
+    color: #27500a;
+  }
+  .rem {
+    background: #fcebeb;
+    color: #791f1f;
+  }
+  .chg {
+    background: #faeeda;
+    color: #633806;
+  }
+  .same {
+    background: #f1efe8;
+    color: #5f5e5a;
+  }
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    padding: 0 16px;
+  }
+  .tab {
+    font-size: 12px;
+    padding: 8px 14px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -0.5px;
+  }
+  .tab.on {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-text-primary);
+    font-weight: 500;
+  }
+  .diff-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-height: 340px;
+    overflow-y: auto;
+  }
+  .diff-col {
+    overflow: hidden;
+  }
+  .diff-col-head {
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: var(--color-background-secondary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .diff-col:first-child {
+    border-right: 0.5px solid var(--color-border-tertiary);
+  }
+  .diff-line {
+    display: flex;
+    gap: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.6;
+    padding: 0 10px;
+    white-space: pre;
+  }
+  .diff-line.added {
+    background: #eaf3de;
+  }
+  .diff-line.removed {
+    background: #fcebeb;
+  }
+  .diff-line.changed {
+    background: #faeeda;
+  }
+  .diff-line.empty {
+    background: var(--color-background-secondary);
+    color: transparent;
+    user-select: none;
+  }
+  .ln {
+    min-width: 28px;
+    color: var(--color-text-tertiary);
+    font-size: 10px;
+    text-align: right;
+    padding-right: 8px;
+    flex-shrink: 0;
+    line-height: 1.6;
+  }
+  .sym {
+    min-width: 14px;
+    flex-shrink: 0;
+    line-height: 1.6;
+    font-weight: 500;
+  }
+  .added .sym {
+    color: #3b6d11;
+  }
+  .removed .sym {
+    color: #a32d2d;
+  }
+  .changed .sym {
+    color: #854f0b;
+  }
+  .xc {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-primary);
+  }
+  .struct-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    max-height: 340px;
+    overflow-y: auto;
+  }
+  .struct-col {
+    padding: 12px 16px;
+  }
+  .struct-col:first-child {
+    border-right: 0.5px solid var(--color-border-tertiary);
+  }
+  .struct-col-head {
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: var(--color-background-secondary);
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    position: sticky;
+    top: 0;
+  }
+  .tree-node {
+    padding: 3px 0;
+    font-size: 12px;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tree-node.indent1 {
+    padding-left: 16px;
+  }
+  .tree-node.indent2 {
+    padding-left: 32px;
+  }
+  .tree-node.indent3 {
+    padding-left: 48px;
+  }
+  .tree-node.added {
+    color: #3b6d11;
+    background: #eaf3de;
+    border-radius: 4px;
+    padding-left: 4px;
+  }
+  .tree-node.removed {
+    color: #a32d2d;
+    background: #fcebeb;
+    border-radius: 4px;
+    padding-left: 4px;
+  }
+  .tree-node.changed {
+    color: #854f0b;
+    background: #faeeda;
+    border-radius: 4px;
+    padding-left: 4px;
+  }
+  .tree-node.indent1.added,
+  .tree-node.indent1.removed,
+  .tree-node.indent1.changed {
+    padding-left: 20px;
+  }
+  .tree-node.indent2.added,
+  .tree-node.indent2.removed,
+  .tree-node.indent2.changed {
+    padding-left: 36px;
+  }
+  .legend {
+    display: flex;
+    gap: 10px;
+    padding: 8px 16px;
+    border-top: 0.5px solid var(--color-border-tertiary);
+    background: var(--color-background-secondary);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    align-items: center;
+  }
+  @media (prefers-color-scheme: dark) {
+    .bauto {
+      background: #633806;
+      color: #fac775;
+    }
+    .bman {
+      background: #444441;
+      color: #b4b2a9;
+    }
+    .add {
+      background: #27500a;
+      color: #c0dd97;
+    }
+    .rem {
+      background: #791f1f;
+      color: #f7c1c1;
+    }
+    .chg {
+      background: #633806;
+      color: #fac775;
+    }
+    .same {
+      background: #444441;
+      color: #b4b2a9;
+    }
+    .diff-line.added {
+      background: #27500a22;
+    }
+    .diff-line.removed {
+      background: #791f1f22;
+    }
+    .diff-line.changed {
+      background: #63380622;
+    }
+    .tree-node.added {
+      background: #27500a22;
+      color: #97c459;
+    }
+    .tree-node.removed {
+      background: #791f1f22;
+      color: #f09595;
+    }
+    .tree-node.changed {
+      background: #63380622;
+      color: #ef9f27;
+    }
+  }
 </style>
 
 <div class="cmp">
   <div class="bar">
-    <i class="ti ti-arrows-diff" aria-hidden="true" style="font-size:17px;color:var(--color-text-secondary)"></i>
+    <i
+      class="ti ti-arrows-diff"
+      aria-hidden="true"
+      style="font-size: 17px; color: var(--color-text-secondary)"
+    ></i>
     <span class="bar-title">Version comparison — ZMM_PURCHASE_SRV</span>
-    <div class="ml" style="display:flex;gap:6px">
-      <button class="btn" onclick="sendPrompt('How does the version comparison download work?')"><i class="ti ti-download" aria-hidden="true"></i> Export diff ↗</button>
-      <button class="btn" onclick="sendPrompt('Can I share a link to this diff view?')"><i class="ti ti-share" aria-hidden="true"></i> Share ↗</button>
+    <div class="ml" style="display: flex; gap: 6px">
+      <button
+        class="btn"
+        onclick="sendPrompt('How does the version comparison download work?')"
+      >
+        <i class="ti ti-download" aria-hidden="true"></i> Export diff ↗
+      </button>
+      <button
+        class="btn"
+        onclick="sendPrompt('Can I share a link to this diff view?')"
+      >
+        <i class="ti ti-share" aria-hidden="true"></i> Share ↗
+      </button>
     </div>
   </div>
 
@@ -74,37 +380,80 @@
       <div class="ver-label">Base version</div>
       <div class="ver-pick">
         <span class="ver-name">v5</span>
-        <span class="badge bman"><i class="ti ti-user" aria-hidden="true" style="font-size:10px"></i> Manual</span>
-        <select style="font-size:11px;padding:3px 6px;margin-left:4px"><option>v5 · 10 Feb 2025</option><option>v4</option><option>v3</option><option>v2</option><option>v1</option></select>
+        <span class="badge bman"
+          ><i class="ti ti-user" aria-hidden="true" style="font-size: 10px"></i>
+          Manual</span
+        >
+        <select style="font-size: 11px; padding: 3px 6px; margin-left: 4px">
+          <option>v5 · 10 Feb 2025</option>
+          <option>v4</option>
+          <option>v3</option>
+          <option>v2</option>
+          <option>v1</option>
+        </select>
       </div>
-      <div class="ver-meta">JDOE · TR#K8X044 · SEGW: ZMM_PO_PROJ · 12 entities</div>
+      <div class="ver-meta">
+        JDOE · TR#K8X044 · SEGW: ZMM_PO_PROJ · 12 entities
+      </div>
     </div>
     <div class="swap-btn">
-      <button class="btn" title="Swap versions" aria-label="Swap base and compare versions" onclick="sendPrompt('How does the swap version direction work in compare?')"><i class="ti ti-arrows-left-right" aria-hidden="true" style="font-size:16px"></i></button>
+      <button
+        class="btn"
+        title="Swap versions"
+        aria-label="Swap base and compare versions"
+        onclick="
+          sendPrompt('How does the swap version direction work in compare?')
+        "
+      >
+        <i
+          class="ti ti-arrows-left-right"
+          aria-hidden="true"
+          style="font-size: 16px"
+        ></i>
+      </button>
     </div>
     <div class="ver-sel">
       <div class="ver-label">Compare version</div>
       <div class="ver-pick">
         <span class="ver-name">v7</span>
-        <span class="badge bauto"><i class="ti ti-robot" aria-hidden="true" style="font-size:10px"></i> Auto</span>
-        <select style="font-size:11px;padding:3px 6px;margin-left:4px"><option>v7 · Today 06:00</option><option>v6</option><option>v5</option></select>
+        <span class="badge bauto"
+          ><i
+            class="ti ti-robot"
+            aria-hidden="true"
+            style="font-size: 10px"
+          ></i>
+          Auto</span
+        >
+        <select style="font-size: 11px; padding: 3px 6px; margin-left: 4px">
+          <option>v7 · Today 06:00</option>
+          <option>v6</option>
+          <option>v5</option>
+        </select>
       </div>
-      <div class="ver-meta">SYSTEM · TR#K9A002 · App: ZMM_PURCHASE_UI · 14 entities</div>
+      <div class="ver-meta">
+        SYSTEM · TR#K9A002 · App: ZMM_PURCHASE_UI · 14 entities
+      </div>
     </div>
   </div>
 
   <div class="delta-bar">
     <i class="ti ti-equal-not" aria-hidden="true"></i>
-    <span style="font-weight:500;color:var(--color-text-primary)">Diff summary:</span>
+    <span style="font-weight: 500; color: var(--color-text-primary)"
+      >Diff summary:</span
+    >
     <span class="delta-pill add">+2 added</span>
     <span class="delta-pill rem">−0 removed</span>
     <span class="delta-pill chg">~3 changed</span>
     <span class="delta-pill same">22 unchanged</span>
-    <span style="margin-left:auto;color:var(--color-text-tertiary)">v5 → v7 · 2 transports · app: ZMM_PURCHASE_UI</span>
+    <span style="margin-left: auto; color: var(--color-text-tertiary)"
+      >v5 → v7 · 2 transports · app: ZMM_PURCHASE_UI</span
+    >
   </div>
 
   <div class="tabs">
-    <div class="tab on" id="tab-struct" onclick="switchTab('struct')">Structural diff</div>
+    <div class="tab on" id="tab-struct" onclick="switchTab('struct')">
+      Structural diff
+    </div>
     <div class="tab" id="tab-xml" onclick="switchTab('xml')">XML diff</div>
   </div>
 
@@ -113,90 +462,465 @@
       <div>
         <div class="struct-col-head">v5 — base (12 entity types)</div>
         <div class="struct-col">
-          <div class="tree-node"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px;color:var(--color-text-tertiary)"></i> EntityTypes (12)</div>
-          <div class="tree-node indent1"><i class="ti ti-table" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PurchaseOrderSet</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> PurchaseOrder (Key)</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> CompanyCode</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> DocumentDate</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> TotalAmount</div>
-          <div class="tree-node indent2 changed"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> Vendor (MaxLength=10)</div>
-          <div class="tree-node indent1"><i class="ti ti-table" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PurchaseOrderItemSet</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> PurchaseOrder (Key)</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> ItemNumber (Key)</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> Material</div>
-          <div class="tree-node indent2 changed"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> Quantity (Scale=3)</div>
-          <div class="tree-node indent1 changed"><i class="ti ti-table" aria-hidden="true" style="font-size:11px"></i> PartnerSet (Name changed)</div>
-          <div class="tree-node"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px;color:var(--color-text-tertiary)"></i> Associations (9)</div>
-          <div class="tree-node indent1"><i class="ti ti-arrows-right-left" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PO_Items_Assoc</div>
-          <div class="tree-node indent1"><i class="ti ti-arrows-right-left" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PO_Partner_Assoc</div>
-          <div class="tree-node"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px;color:var(--color-text-tertiary)"></i> FunctionImports (3)</div>
-          <div class="tree-node indent1"><i class="ti ti-function" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> GetOpenOrders</div>
-          <div class="tree-node indent1"><i class="ti ti-function" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> ConfirmDelivery</div>
+          <div class="tree-node">
+            <i
+              class="ti ti-folder"
+              aria-hidden="true"
+              style="font-size: 12px; color: var(--color-text-tertiary)"
+            ></i>
+            EntityTypes (12)
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-table"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PurchaseOrderSet
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            PurchaseOrder (Key)
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            CompanyCode
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            DocumentDate
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            TotalAmount
+          </div>
+          <div class="tree-node indent2 changed">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            Vendor (MaxLength=10)
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-table"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PurchaseOrderItemSet
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            PurchaseOrder (Key)
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            ItemNumber (Key)
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            Material
+          </div>
+          <div class="tree-node indent2 changed">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            Quantity (Scale=3)
+          </div>
+          <div class="tree-node indent1 changed">
+            <i
+              class="ti ti-table"
+              aria-hidden="true"
+              style="font-size: 11px"
+            ></i>
+            PartnerSet (Name changed)
+          </div>
+          <div class="tree-node">
+            <i
+              class="ti ti-folder"
+              aria-hidden="true"
+              style="font-size: 12px; color: var(--color-text-tertiary)"
+            ></i>
+            Associations (9)
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-arrows-right-left"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PO_Items_Assoc
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-arrows-right-left"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PO_Partner_Assoc
+          </div>
+          <div class="tree-node">
+            <i
+              class="ti ti-folder"
+              aria-hidden="true"
+              style="font-size: 12px; color: var(--color-text-tertiary)"
+            ></i>
+            FunctionImports (3)
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-function"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            GetOpenOrders
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-function"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            ConfirmDelivery
+          </div>
         </div>
       </div>
       <div>
         <div class="struct-col-head">v7 — compare (14 entity types)</div>
         <div class="struct-col">
-          <div class="tree-node"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px;color:var(--color-text-tertiary)"></i> EntityTypes (14)</div>
-          <div class="tree-node indent1"><i class="ti ti-table" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PurchaseOrderSet</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> PurchaseOrder (Key)</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> CompanyCode</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> DocumentDate</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> TotalAmount</div>
-          <div class="tree-node indent2 changed"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> Vendor (MaxLength=20) ✦</div>
-          <div class="tree-node indent1"><i class="ti ti-table" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PurchaseOrderItemSet</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> PurchaseOrder (Key)</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> ItemNumber (Key)</div>
-          <div class="tree-node indent2"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> Material</div>
-          <div class="tree-node indent2 changed"><i class="ti ti-point" aria-hidden="true" style="font-size:10px"></i> Quantity (Scale=6) ✦</div>
-          <div class="tree-node indent1 changed"><i class="ti ti-table" aria-hidden="true" style="font-size:11px"></i> BusinessPartnerSet ✦</div>
-          <div class="tree-node"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px;color:var(--color-text-tertiary)"></i> Associations (11)</div>
-          <div class="tree-node indent1"><i class="ti ti-arrows-right-left" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PO_Items_Assoc</div>
-          <div class="tree-node indent1"><i class="ti ti-arrows-right-left" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> PO_Partner_Assoc</div>
-          <div class="tree-node indent1 added"><i class="ti ti-arrows-right-left" aria-hidden="true" style="font-size:11px"></i> PO_Address_Assoc +</div>
-          <div class="tree-node indent1 added"><i class="ti ti-arrows-right-left" aria-hidden="true" style="font-size:11px"></i> PO_Approval_Assoc +</div>
-          <div class="tree-node"><i class="ti ti-folder" aria-hidden="true" style="font-size:12px;color:var(--color-text-tertiary)"></i> FunctionImports (4)</div>
-          <div class="tree-node indent1"><i class="ti ti-function" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> GetOpenOrders</div>
-          <div class="tree-node indent1"><i class="ti ti-function" aria-hidden="true" style="font-size:11px;color:var(--color-text-tertiary)"></i> ConfirmDelivery</div>
-          <div class="tree-node indent1 added"><i class="ti ti-function" aria-hidden="true" style="font-size:11px"></i> GetApprovalStatus +</div>
+          <div class="tree-node">
+            <i
+              class="ti ti-folder"
+              aria-hidden="true"
+              style="font-size: 12px; color: var(--color-text-tertiary)"
+            ></i>
+            EntityTypes (14)
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-table"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PurchaseOrderSet
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            PurchaseOrder (Key)
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            CompanyCode
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            DocumentDate
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            TotalAmount
+          </div>
+          <div class="tree-node indent2 changed">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            Vendor (MaxLength=20) ✦
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-table"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PurchaseOrderItemSet
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            PurchaseOrder (Key)
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            ItemNumber (Key)
+          </div>
+          <div class="tree-node indent2">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            Material
+          </div>
+          <div class="tree-node indent2 changed">
+            <i
+              class="ti ti-point"
+              aria-hidden="true"
+              style="font-size: 10px"
+            ></i>
+            Quantity (Scale=6) ✦
+          </div>
+          <div class="tree-node indent1 changed">
+            <i
+              class="ti ti-table"
+              aria-hidden="true"
+              style="font-size: 11px"
+            ></i>
+            BusinessPartnerSet ✦
+          </div>
+          <div class="tree-node">
+            <i
+              class="ti ti-folder"
+              aria-hidden="true"
+              style="font-size: 12px; color: var(--color-text-tertiary)"
+            ></i>
+            Associations (11)
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-arrows-right-left"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PO_Items_Assoc
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-arrows-right-left"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            PO_Partner_Assoc
+          </div>
+          <div class="tree-node indent1 added">
+            <i
+              class="ti ti-arrows-right-left"
+              aria-hidden="true"
+              style="font-size: 11px"
+            ></i>
+            PO_Address_Assoc +
+          </div>
+          <div class="tree-node indent1 added">
+            <i
+              class="ti ti-arrows-right-left"
+              aria-hidden="true"
+              style="font-size: 11px"
+            ></i>
+            PO_Approval_Assoc +
+          </div>
+          <div class="tree-node">
+            <i
+              class="ti ti-folder"
+              aria-hidden="true"
+              style="font-size: 12px; color: var(--color-text-tertiary)"
+            ></i>
+            FunctionImports (4)
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-function"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            GetOpenOrders
+          </div>
+          <div class="tree-node indent1">
+            <i
+              class="ti ti-function"
+              aria-hidden="true"
+              style="font-size: 11px; color: var(--color-text-tertiary)"
+            ></i>
+            ConfirmDelivery
+          </div>
+          <div class="tree-node indent1 added">
+            <i
+              class="ti ti-function"
+              aria-hidden="true"
+              style="font-size: 11px"
+            ></i>
+            GetApprovalStatus +
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="view-xml" style="display:none">
+  <div id="view-xml" style="display: none">
     <div class="diff-area">
       <div class="diff-col">
         <div class="diff-col-head">v5 · base</div>
-        <div class="diff-line"><span class="ln">8</span><span class="sym"> </span><span class="xc">&lt;EntityType Name="PurchaseOrderSet"&gt;</span></div>
-        <div class="diff-line changed"><span class="ln">13</span><span class="sym">~</span><span class="xc">  &lt;Property Name="Vendor" MaxLength="10"/&gt;</span></div>
-        <div class="diff-line changed"><span class="ln">16</span><span class="sym">~</span><span class="xc">  &lt;Property Name="Quantity" Scale="3"/&gt;</span></div>
-        <div class="diff-line changed"><span class="ln">22</span><span class="sym">~</span><span class="xc">&lt;EntityType Name="PartnerSet"&gt;</span></div>
-        <div class="diff-line empty"><span class="ln"> </span><span class="sym"> </span><span class="xc">—</span></div>
-        <div class="diff-line empty"><span class="ln"> </span><span class="sym"> </span><span class="xc">—</span></div>
-        <div class="diff-line"><span class="ln">30</span><span class="sym"> </span><span class="xc">&lt;Association Name="PO_Items_Assoc"&gt;</span></div>
-        <div class="diff-line"><span class="ln">36</span><span class="sym"> </span><span class="xc">&lt;Association Name="PO_Partner_Assoc"&gt;</span></div>
-        <div class="diff-line empty"><span class="ln"> </span><span class="sym"> </span><span class="xc">—</span></div>
-        <div class="diff-line empty"><span class="ln"> </span><span class="sym"> </span><span class="xc">—</span></div>
-        <div class="diff-line"><span class="ln">44</span><span class="sym"> </span><span class="xc">&lt;FunctionImport Name="GetOpenOrders"/&gt;</span></div>
-        <div class="diff-line"><span class="ln">46</span><span class="sym"> </span><span class="xc">&lt;FunctionImport Name="ConfirmDelivery"/&gt;</span></div>
-        <div class="diff-line empty"><span class="ln"> </span><span class="sym"> </span><span class="xc">—</span></div>
+        <div class="diff-line">
+          <span class="ln">8</span><span class="sym"> </span
+          ><span class="xc">&lt;EntityType Name="PurchaseOrderSet"&gt;</span>
+        </div>
+        <div class="diff-line changed">
+          <span class="ln">13</span><span class="sym">~</span
+          ><span class="xc">
+            &lt;Property Name="Vendor" MaxLength="10"/&gt;</span
+          >
+        </div>
+        <div class="diff-line changed">
+          <span class="ln">16</span><span class="sym">~</span
+          ><span class="xc"> &lt;Property Name="Quantity" Scale="3"/&gt;</span>
+        </div>
+        <div class="diff-line changed">
+          <span class="ln">22</span><span class="sym">~</span
+          ><span class="xc">&lt;EntityType Name="PartnerSet"&gt;</span>
+        </div>
+        <div class="diff-line empty">
+          <span class="ln"> </span><span class="sym"> </span
+          ><span class="xc">—</span>
+        </div>
+        <div class="diff-line empty">
+          <span class="ln"> </span><span class="sym"> </span
+          ><span class="xc">—</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">30</span><span class="sym"> </span
+          ><span class="xc">&lt;Association Name="PO_Items_Assoc"&gt;</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">36</span><span class="sym"> </span
+          ><span class="xc">&lt;Association Name="PO_Partner_Assoc"&gt;</span>
+        </div>
+        <div class="diff-line empty">
+          <span class="ln"> </span><span class="sym"> </span
+          ><span class="xc">—</span>
+        </div>
+        <div class="diff-line empty">
+          <span class="ln"> </span><span class="sym"> </span
+          ><span class="xc">—</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">44</span><span class="sym"> </span
+          ><span class="xc">&lt;FunctionImport Name="GetOpenOrders"/&gt;</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">46</span><span class="sym"> </span
+          ><span class="xc"
+            >&lt;FunctionImport Name="ConfirmDelivery"/&gt;</span
+          >
+        </div>
+        <div class="diff-line empty">
+          <span class="ln"> </span><span class="sym"> </span
+          ><span class="xc">—</span>
+        </div>
       </div>
       <div class="diff-col">
         <div class="diff-col-head">v7 · compare</div>
-        <div class="diff-line"><span class="ln">8</span><span class="sym"> </span><span class="xc">&lt;EntityType Name="PurchaseOrderSet"&gt;</span></div>
-        <div class="diff-line changed"><span class="ln">13</span><span class="sym">~</span><span class="xc">  &lt;Property Name="Vendor" MaxLength="20"/&gt;</span></div>
-        <div class="diff-line changed"><span class="ln">16</span><span class="sym">~</span><span class="xc">  &lt;Property Name="Quantity" Scale="6"/&gt;</span></div>
-        <div class="diff-line changed"><span class="ln">22</span><span class="sym">~</span><span class="xc">&lt;EntityType Name="BusinessPartnerSet"&gt;</span></div>
-        <div class="diff-line added"><span class="ln">28</span><span class="sym">+</span><span class="xc">&lt;EntityType Name="ApprovalStepSet"&gt;</span></div>
-        <div class="diff-line added"><span class="ln">34</span><span class="sym">+</span><span class="xc">&lt;EntityType Name="AddressSet"&gt;</span></div>
-        <div class="diff-line"><span class="ln">41</span><span class="sym"> </span><span class="xc">&lt;Association Name="PO_Items_Assoc"&gt;</span></div>
-        <div class="diff-line"><span class="ln">47</span><span class="sym"> </span><span class="xc">&lt;Association Name="PO_Partner_Assoc"&gt;</span></div>
-        <div class="diff-line added"><span class="ln">53</span><span class="sym">+</span><span class="xc">&lt;Association Name="PO_Address_Assoc"&gt;</span></div>
-        <div class="diff-line added"><span class="ln">59</span><span class="sym">+</span><span class="xc">&lt;Association Name="PO_Approval_Assoc"&gt;</span></div>
-        <div class="diff-line"><span class="ln">65</span><span class="sym"> </span><span class="xc">&lt;FunctionImport Name="GetOpenOrders"/&gt;</span></div>
-        <div class="diff-line"><span class="ln">67</span><span class="sym"> </span><span class="xc">&lt;FunctionImport Name="ConfirmDelivery"/&gt;</span></div>
-        <div class="diff-line added"><span class="ln">69</span><span class="sym">+</span><span class="xc">&lt;FunctionImport Name="GetApprovalStatus"/&gt;</span></div>
+        <div class="diff-line">
+          <span class="ln">8</span><span class="sym"> </span
+          ><span class="xc">&lt;EntityType Name="PurchaseOrderSet"&gt;</span>
+        </div>
+        <div class="diff-line changed">
+          <span class="ln">13</span><span class="sym">~</span
+          ><span class="xc">
+            &lt;Property Name="Vendor" MaxLength="20"/&gt;</span
+          >
+        </div>
+        <div class="diff-line changed">
+          <span class="ln">16</span><span class="sym">~</span
+          ><span class="xc"> &lt;Property Name="Quantity" Scale="6"/&gt;</span>
+        </div>
+        <div class="diff-line changed">
+          <span class="ln">22</span><span class="sym">~</span
+          ><span class="xc">&lt;EntityType Name="BusinessPartnerSet"&gt;</span>
+        </div>
+        <div class="diff-line added">
+          <span class="ln">28</span><span class="sym">+</span
+          ><span class="xc">&lt;EntityType Name="ApprovalStepSet"&gt;</span>
+        </div>
+        <div class="diff-line added">
+          <span class="ln">34</span><span class="sym">+</span
+          ><span class="xc">&lt;EntityType Name="AddressSet"&gt;</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">41</span><span class="sym"> </span
+          ><span class="xc">&lt;Association Name="PO_Items_Assoc"&gt;</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">47</span><span class="sym"> </span
+          ><span class="xc">&lt;Association Name="PO_Partner_Assoc"&gt;</span>
+        </div>
+        <div class="diff-line added">
+          <span class="ln">53</span><span class="sym">+</span
+          ><span class="xc">&lt;Association Name="PO_Address_Assoc"&gt;</span>
+        </div>
+        <div class="diff-line added">
+          <span class="ln">59</span><span class="sym">+</span
+          ><span class="xc">&lt;Association Name="PO_Approval_Assoc"&gt;</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">65</span><span class="sym"> </span
+          ><span class="xc">&lt;FunctionImport Name="GetOpenOrders"/&gt;</span>
+        </div>
+        <div class="diff-line">
+          <span class="ln">67</span><span class="sym"> </span
+          ><span class="xc"
+            >&lt;FunctionImport Name="ConfirmDelivery"/&gt;</span
+          >
+        </div>
+        <div class="diff-line added">
+          <span class="ln">69</span><span class="sym">+</span
+          ><span class="xc"
+            >&lt;FunctionImport Name="GetApprovalStatus"/&gt;</span
+          >
+        </div>
       </div>
     </div>
   </div>
@@ -205,15 +929,22 @@
     <span class="delta-pill add">+ added</span>
     <span class="delta-pill rem">− removed</span>
     <span class="delta-pill chg">~ changed</span>
-    <span style="margin-left:auto">Transport diff: v5=TR#K8X044 · v7=TR#K9A002 · triggering app: ZMM_PURCHASE_UI</span>
+    <span style="margin-left: auto"
+      >Transport diff: v5=TR#K8X044 · v7=TR#K9A002 · triggering app:
+      ZMM_PURCHASE_UI</span
+    >
   </div>
 </div>
 
 <script>
-function switchTab(t) {
-  document.getElementById('tab-struct').classList.toggle('on', t==='struct');
-  document.getElementById('tab-xml').classList.toggle('on', t==='xml');
-  document.getElementById('view-struct').style.display = t==='struct' ? '' : 'none';
-  document.getElementById('view-xml').style.display = t==='xml' ? '' : 'none';
-}
+  function switchTab(t) {
+    document
+      .getElementById("tab-struct")
+      .classList.toggle("on", t === "struct");
+    document.getElementById("tab-xml").classList.toggle("on", t === "xml");
+    document.getElementById("view-struct").style.display =
+      t === "struct" ? "" : "none";
+    document.getElementById("view-xml").style.display =
+      t === "xml" ? "" : "none";
+  }
 </script>

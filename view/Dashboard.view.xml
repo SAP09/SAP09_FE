@@ -1,4 +1,4 @@
-<mvc:View
+﻿<mvc:View
     controllerName="odata.metadata.manager.controller.Dashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
@@ -16,10 +16,10 @@
                 <contentLeft>
                     <core:Icon src="sap-icon://database" size="1.25rem" class="topBarIcon" />
                     <Title text="OData Metadata Manager" class="topBarTitle" />
-                    <GenericTag
-                        text="Auto-scan: daily · last run 06:00"
-                        status="Information"
-                        class="autoScanChip" />
+                    <HBox class="autoScanSimple" alignItems="Center">
+                        <core:Icon src="sap-icon://message-information" size="0.875rem" class="autoScanIcon" />
+                        <Text text="Auto-scan: daily · last run 06:00" class="autoScanSimpleText" />
+                    </HBox>
                 </contentLeft>
                 <contentRight>
                     <Button
@@ -89,17 +89,18 @@
                             <core:Item key="All"      text="All statuses" />
                             <core:Item key="Active"   text="Active" />
                             <core:Item key="Inactive" text="Inactive" />
-                            <core:Item key="Archived" text="Archived" />
+                            <core:Item key="Deleted"  text="Deleted" />
                         </items>
                     </Select>
-                </contentLeft>
-                <contentRight>
+
+                    <ToolbarSpacer />
+
                     <ToggleButton
                         id="showDeletedToggle"
                         text="Show deleted"
                         icon="sap-icon://delete"
                         press="onShowDeletedToggle" />
-                </contentRight>
+                </contentLeft>
             </Bar>
         </subHeader>
 
@@ -287,11 +288,15 @@
                             <!-- v7: Latest, Auto -->
                             <VBox class="snapshotCard snapshotCard-latest" id="snapshotCard_v7">
                                 <HBox class="snapshotCardHeader" alignItems="Center">
-                                    <Text text="v7" class="snapshotVersion" />
-                                    <Text text="Latest" class="badge badge-latest" />
-                                    <Text text="🤖 Auto" class="badge badge-auto" />
+                                    <HBox class="snapshotCardHeaderLeft" alignItems="Center">
+                                        <Text text="v7" class="snapshotVersion" />
+                                        <Text text="Latest" class="badge badge-latest" />
+                                        <Text text="🤖 Auto" class="badge badge-auto" />
+                                    </HBox>
                                     <ToolbarSpacer />
-                                    <Text text="Today 06:00 · auto-scan" class="snapshotDate" />
+                                    <HBox class="snapshotCardHeaderRight" alignItems="Center">
+                                        <Text text="Today 06:00 · auto-scan" class="snapshotDate" />
+                                    </HBox>
                                 </HBox>
                                 <HBox class="snapshotMeta" alignItems="Center">
                                     <core:Icon src="sap-icon://employee" size="0.75rem" />
@@ -314,10 +319,14 @@
                             <!-- v6: Auto -->
                             <VBox class="snapshotCard" id="snapshotCard_v6">
                                 <HBox class="snapshotCardHeader" alignItems="Center">
-                                    <Text text="v6" class="snapshotVersion" />
-                                    <Text text="🤖 Auto" class="badge badge-auto" />
+                                    <HBox class="snapshotCardHeaderLeft" alignItems="Center">
+                                        <Text text="v6" class="snapshotVersion" />
+                                        <Text text="🤖 Auto" class="badge badge-auto" />
+                                    </HBox>
                                     <ToolbarSpacer />
-                                    <Text text="22 Mar 2025" class="snapshotDate" />
+                                    <HBox class="snapshotCardHeaderRight" alignItems="Center">
+                                        <Text text="22 Mar 2025" class="snapshotDate" />
+                                    </HBox>
                                 </HBox>
                                 <HBox class="snapshotMeta" alignItems="Center">
                                     <Text text="SYSTEM · TR#K9A001 · App: ZMM_PURCHASE_UI" class="snapshotMetaText" />
@@ -334,10 +343,14 @@
                             <!-- v5: Manual -->
                             <VBox class="snapshotCard" id="snapshotCard_v5">
                                 <HBox class="snapshotCardHeader" alignItems="Center">
-                                    <Text text="v5" class="snapshotVersion" />
-                                    <Text text="👤 Manual" class="badge badge-manual" />
+                                    <HBox class="snapshotCardHeaderLeft" alignItems="Center">
+                                        <Text text="v5" class="snapshotVersion" />
+                                        <Text text="👤 Manual" class="badge badge-manual" />
+                                    </HBox>
                                     <ToolbarSpacer />
-                                    <Text text="10 Feb 2025" class="snapshotDate" />
+                                    <HBox class="snapshotCardHeaderRight" alignItems="Center">
+                                        <Text text="10 Feb 2025" class="snapshotDate" />
+                                    </HBox>
                                 </HBox>
                                 <HBox class="snapshotMeta" alignItems="Center">
                                     <Text text="JDOE · TR#K8X044 · SEGW: ZMM_PO_PROJ" class="snapshotMetaText" />
@@ -354,10 +367,14 @@
                             <!-- v4 -->
                             <VBox class="snapshotCard" id="snapshotCard_v4">
                                 <HBox class="snapshotCardHeader" alignItems="Center">
-                                    <Text text="v4" class="snapshotVersion" />
-                                    <Text text="🤖 Auto" class="badge badge-auto" />
+                                    <HBox class="snapshotCardHeaderLeft" alignItems="Center">
+                                        <Text text="v4" class="snapshotVersion" />
+                                        <Text text="🤖 Auto" class="badge badge-auto" />
+                                    </HBox>
                                     <ToolbarSpacer />
-                                    <Text text="15 Jan 2025" class="snapshotDate" />
+                                    <HBox class="snapshotCardHeaderRight" alignItems="Center">
+                                        <Text text="15 Jan 2025" class="snapshotDate" />
+                                    </HBox>
                                 </HBox>
                                 <HBox class="snapshotMeta" alignItems="Center">
                                     <Text text="SYSTEM · TR#K7W033 · App: ZMM_PURCHASE_UI" class="snapshotMetaText" />
@@ -372,10 +389,14 @@
                             <!-- v3 -->
                             <VBox class="snapshotCard" id="snapshotCard_v3">
                                 <HBox class="snapshotCardHeader" alignItems="Center">
-                                    <Text text="v3" class="snapshotVersion" />
-                                    <Text text="👤 Manual" class="badge badge-manual" />
+                                    <HBox class="snapshotCardHeaderLeft" alignItems="Center">
+                                        <Text text="v3" class="snapshotVersion" />
+                                        <Text text="👤 Manual" class="badge badge-manual" />
+                                    </HBox>
                                     <ToolbarSpacer />
-                                    <Text text="02 Dec 2024" class="snapshotDate" />
+                                    <HBox class="snapshotCardHeaderRight" alignItems="Center">
+                                        <Text text="02 Dec 2024" class="snapshotDate" />
+                                    </HBox>
                                 </HBox>
                                 <HBox class="snapshotMeta" alignItems="Center">
                                     <Text text="ASMITH · TR#K6V022 · SEGW: ZMM_PO_PROJ" class="snapshotMetaText" />
