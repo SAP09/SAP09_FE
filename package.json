@@ -1,0 +1,16 @@
+{
+  "name": "sap09-fe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SAP UI5 frontend for OData Metadata Manager",
+  "scripts": {
+    "start": "serve -s . -l 8080",
+    "start:preview": "serve -s . -l 5000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
