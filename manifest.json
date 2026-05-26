@@ -6,7 +6,22 @@
     "title": "OData Metadata Manager",
     "description": "Manage, compare and snapshot OData service metadata versions",
     "applicationVersion": { "version": "1.0.0" },
-    "dataSources": {}
+    "dataSources": {
+      "mainOData": {
+        "uri": "",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0",
+          "localUri": "localService/metadata.xml"
+        }
+      }
+    },
+    "backend": {
+      "enabled": false,
+      "url": "",
+      "odataVersion": "v4",
+      "authType": "None"
+    }
   },
   "sap.ui": {
     "technology": "UI5",
