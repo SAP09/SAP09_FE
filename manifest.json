@@ -19,7 +19,22 @@
         }
       }
     },
-    "dataSources": {}
+    "dataSources": {
+      "mainOData": {
+        "uri": "",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0",
+          "localUri": "localService/metadata.xml"
+        }
+      }
+    },
+    "backend": {
+      "enabled": false,
+      "url": "",
+      "odataVersion": "v4",
+      "authType": "None"
+    }
   },
   "sap.cloud": {
     "service": "odata.metadata.manager"
