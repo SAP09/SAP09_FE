@@ -6,6 +6,19 @@
     "title": "OData Metadata Manager",
     "description": "Manage, compare and snapshot OData service metadata versions",
     "applicationVersion": { "version": "1.0.0" },
+    "crossNavigation": {
+      "inbounds": {
+        "display": {
+          "semanticObject": "ODataMetadataManager",
+          "action": "display",
+          "title": "OData Metadata Manager",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    },
     "dataSources": {
       "mainOData": {
         "uri": "",
@@ -22,6 +35,9 @@
       "odataVersion": "v4",
       "authType": "None"
     }
+  },
+  "sap.cloud": {
+    "service": "odata.metadata.manager"
   },
   "sap.ui": {
     "technology": "UI5",

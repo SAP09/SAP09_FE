@@ -5,7 +5,13 @@
   "description": "SAP UI5 frontend for OData Metadata Manager",
   "scripts": {
     "start": "serve -s . -l 8080",
-    "start:preview": "serve -s . -l 5000"
+    "start:preview": "serve -s . -l 5000",
+    "prepare:approuter": "node scripts/prepare-approuter.mjs",
+    "install:approuter": "npm install --prefix approuter",
+    "start:approuter": "npm --prefix approuter start",
+    "deploy:static": "cf push -f manifest.yml",
+    "build:mta": "npm run prepare:approuter && mbt build",
+    "deploy:mta": "npm run build:mta && cf deploy mta_archives/sap09-fe_1.0.0.mtar"
   },
   "devDependencies": {
     "serve": "^14.2.4"

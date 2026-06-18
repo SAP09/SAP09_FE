@@ -1,0 +1,15 @@
+{
+  "name": "sap09-fe-approuter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SAP BTP approuter for SAP09_FE",
+  "scripts": {
+    "start": "node node_modules/@sap/approuter/approuter.js"
+  },
+  "dependencies": {
+    "@sap/approuter": "^22.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

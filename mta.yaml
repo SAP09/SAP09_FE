@@ -1,0 +1,24 @@
+_schema-version: "3.2"
+ID: sap09-fe
+version: 1.0.0
+description: SAPUI5 frontend with approuter and xsuaa
+
+modules:
+  - name: sap09-fe-approuter
+    type: approuter.nodejs
+    path: approuter
+    parameters:
+      memory: 128M
+      disk-quota: 256M
+    build-parameters:
+      builder: npm
+    requires:
+      - name: sap09-fe-xsuaa
+
+resources:
+  - name: sap09-fe-xsuaa
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: xs-security.json
