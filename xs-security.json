@@ -1,0 +1,24 @@
+{
+  "xsappname": "sap09-fe",
+  "tenant-mode": "dedicated",
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://7f4c3e60trial-dev-sap09-fe-approuter.cfapps.us10-001.hana.ondemand.com/login/callback"
+    ]
+  },
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Display",
+      "description": "Read access to OData Metadata Manager"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "Viewer",
+      "description": "Can open and use the app",
+      "scope-references": [
+        "$XSAPPNAME.Display"
+      ]
+    }
+  ]
+}
