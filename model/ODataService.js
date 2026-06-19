@@ -5,121 +5,137 @@ sap.ui.define(
 
     return {
       /**
-       * Create an ODataService instance
+       * Create an ODataService instance wired to the RAP backend via the approuter.
+       * Authentication (XSUAA JWT) is forwarded automatically by the approuter.
+       *
+       * Backend: https://s40lp1.ucc.cit.tum.de
+       * Service: /sap/opu/odata4/sap/zsb_gsugp9/srvd_a2x/sap/zsr_registry/0001/
+       * Proxied via approuter at: /backend/
+       *
        * @param {sap.ui.core.UIComponent} oComponent - Component reference
-       * @returns {Object} Service object with read/create/update/delete methods
+       * @returns {Object} Service object with read/create/update/delete/query methods
        */
       createInstance: function (oComponent) {
-        var sODataVersion = Config.ODATA_VERSION;
-        var sBackendUrl = Config.BACKEND_URL;
+        var sODataVersion = Config.ODATA_VERSION;   // "v4"
+        var sBackendUrl   = Config.BACKEND_URL;     // "/backend/"
+        var sSapClient    = Config.SAP_CLIENT;      // "324"
 
-        // Determine OData model class
-        var ODataModelClass = sODataVersion === "v4" ? ODataModelV4 : ODataModelV2;
+        var oModel;
 
-        // Model initialization settings
-        var oModelSettings = {
-          defaultBindingMode: "TwoWay",
-          metadataUrlParams: { sap_theme: "sap_horizon" },
-          json: true,
-          timeout: Config.REQUEST_TIMEOUT,
-        };
-
-        // Create OData model (to be attached to component)
-        var oModel = new ODataModelClass(sBackendUrl, oModelSettings);
+        if (sODataVersion === "v4") {
+          // ── OData V4 Model ────────────────────────────────────────────────────
+          // serviceUrl is passed inside the settings object (not as the first arg).
+          // v2-only options (json, metadataUrlParams, defaultBindingMode, timeout)
+          // must NOT be passed to the v4 constructor — they cause silent failures.
+          oModel = new ODataModelV4({
+            serviceUrl:          sBackendUrl,
+            synchronizationMode: "None",
+            operationMode:       "Server",
+            autoExpandSelect:    true,
+            httpHeaders: {
+              "sap-client": sSapClient,
+            },
+          });
+        } else {
+          // ── OData V2 Model (fallback) ─────────────────────────────────────────
+          oModel = new ODataModelV2(sBackendUrl, {
+            defaultBindingMode: "TwoWay",
+            metadataUrlParams:  { "sap-client": sSapClient },
+            json:               true,
+            timeout:            Config.REQUEST_TIMEOUT,
+          });
+        }
 
         return {
           /**
-           * Read initial data via OData
-           * @param {Function} fnSuccess - Success callback
-           * @param {Function} fnError - Error callback
+           * Verify the backend is reachable.
+           * For OData v4 the model loads metadata lazily on first binding;
+           * readiness is signalled immediately so the router can start.
+           *
+           * @param {Function} fnSuccess - Called when service is ready
+           * @param {Function} fnError   - Called on metadata failure (v2 only)
            */
           read: function (fnSuccess, fnError) {
-            // For OData, data is fetched via model binding
-            // This callback ensures data is ready
-            oModel.attachMetadataLoaded(function () {
+            if (sODataVersion === "v4") {
+              // V4: actual data arrives via list/context bindings in views.
               if (fnSuccess) {
                 fnSuccess();
               }
-            });
-
-            oModel.attachMetadataFailed(function (oEvent) {
-              if (fnError) {
-                fnError(oEvent);
-              }
-            });
+            } else {
+              oModel.attachMetadataLoaded(function () {
+                if (fnSuccess) { fnSuccess(); }
+              });
+              oModel.attachMetadataFailed(function (oEvent) {
+                if (fnError) { fnError(oEvent); }
+              });
+            }
           },
 
           /**
            * Create a new entity via OData
-           * @param {string} sEntitySet - Entity set name
-           * @param {Object} oData - Entity data
-           * @param {Function} fnSuccess - Success callback
-           * @param {Function} fnError - Error callback
+           * @param {string} sEntitySet - Key from Config.ENTITY_SETS (e.g. "registry")
+           * @param {Object} oData      - Entity payload
+           * @param {Function} fnSuccess
+           * @param {Function} fnError
            */
           create: function (sEntitySet, oData, fnSuccess, fnError) {
             var sPath = "/" + Config.getEntitySet(sEntitySet);
-
             oModel.create(sPath, oData, {
               success: fnSuccess,
-              error: fnError,
-              async: true,
+              error:   fnError,
+              async:   true,
             });
           },
 
           /**
            * Update an entity via OData
-           * @param {string} sEntitySet - Entity set name
-           * @param {string} sKey - Entity key
-           * @param {Object} oData - Updated data
-           * @param {Function} fnSuccess - Success callback
-           * @param {Function} fnError - Error callback
+           * @param {string} sEntitySet - Key from Config.ENTITY_SETS
+           * @param {string} sKey       - OData key predicate (e.g. "GroupId=guid'...'")
+           * @param {Object} oData      - Updated fields
+           * @param {Function} fnSuccess
+           * @param {Function} fnError
            */
           update: function (sEntitySet, sKey, oData, fnSuccess, fnError) {
             var sPath = "/" + Config.getEntitySet(sEntitySet) + "(" + sKey + ")";
-
             oModel.update(sPath, oData, {
               success: fnSuccess,
-              error: fnError,
-              async: true,
+              error:   fnError,
+              async:   true,
             });
           },
 
           /**
            * Delete an entity via OData
-           * @param {string} sEntitySet - Entity set name
-           * @param {string} sKey - Entity key
-           * @param {Function} fnSuccess - Success callback
-           * @param {Function} fnError - Error callback
+           * @param {string} sEntitySet - Key from Config.ENTITY_SETS
+           * @param {string} sKey       - OData key predicate
+           * @param {Function} fnSuccess
+           * @param {Function} fnError
            */
           delete: function (sEntitySet, sKey, fnSuccess, fnError) {
             var sPath = "/" + Config.getEntitySet(sEntitySet) + "(" + sKey + ")";
-
             oModel.remove(sPath, {
               success: fnSuccess,
-              error: fnError,
-              async: true,
+              error:   fnError,
+              async:   true,
             });
           },
 
           /**
-           * Query entities with filters via OData
-           * @param {string} sEntitySet - Entity set name
-           * @param {Object} oFilters - Filter criteria
-           * @param {Function} fnSuccess - Success callback
-           * @param {Function} fnError - Error callback
+           * Query an entity set with optional OData URL parameters
+           * @param {string} sEntitySet - Key from Config.ENTITY_SETS
+           * @param {Object} oFilters   - OData URL params (e.g. $filter, $top, $expand)
+           * @param {Function} fnSuccess - Receives array of results
+           * @param {Function} fnError
            */
           query: function (sEntitySet, oFilters, fnSuccess, fnError) {
-            var sPath = "/" + Config.getEntitySet(sEntitySet);
-            var oRequest = {
-              urlParameters: oFilters,
-              async: true,
-            };
+            var sPath    = "/" + Config.getEntitySet(sEntitySet);
+            var oRequest = { urlParameters: oFilters, async: true };
 
             oModel.read(sPath, {
               ...oRequest,
               success: function (oData) {
                 if (fnSuccess) {
-                  fnSuccess(oData.results || oData);
+                  fnSuccess(oData.results || oData.value || oData);
                 }
               },
               error: fnError,
@@ -127,23 +143,24 @@ sap.ui.define(
           },
 
           /**
-           * Get the underlying OData model
-           * @returns {Object} ODataModel instance
+           * Get the underlying OData model (for direct view/list binding)
+           * @returns {sap.ui.model.odata.v4.ODataModel}
            */
           getModel: function () {
             return oModel;
           },
 
           /**
-           * Check service status
-           * @returns {Object} Status object
+           * Return service status information
+           * @returns {Object}
            */
           getStatus: function () {
             return {
-              isOnline: true,
-              isMock: false,
-              backend: sBackendUrl,
+              isOnline:     true,
+              isMock:       false,
+              backend:      sBackendUrl,
               odataVersion: sODataVersion,
+              sapClient:    sSapClient,
             };
           },
         };
@@ -151,4 +168,3 @@ sap.ui.define(
     };
   }
 );
-

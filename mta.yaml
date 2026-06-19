@@ -12,8 +12,11 @@ modules:
       disk-quota: 256M
     build-parameters:
       builder: npm
+    properties:
+      SAP_CLIENT: "324"
     requires:
       - name: sap09-fe-xsuaa
+      - name: sap09-fe-destination
 
 resources:
   - name: sap09-fe-xsuaa
@@ -22,3 +25,9 @@ resources:
       service: xsuaa
       service-plan: application
       path: xs-security.json
+
+  - name: sap09-fe-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite

@@ -3,35 +3,37 @@ sap.ui.define([], function () {
 
   return {
     // ─── Backend Configuration ──────────────────────────────────────────
-    // Set to true when RAP backend is ready and configured
-    BACKEND_ENABLED: false,
+    // RAP OData v4 backend is now active — proxied via SAP Approuter
+    BACKEND_ENABLED: true,
 
-    // Backend service URL (activate when BACKEND_ENABLED is true)
-    // Format: https://<host>:<port>/sap/opu/odata/sap/<RAP_SERVICE>
-    // Example: "https://sap-system.example.com:8443/sap/opu/odata/sap/ZMM_METADATA_SRV"
-    BACKEND_URL: "",
+    // Relative URL through approuter /backend proxy route.
+    // Approuter maps: /backend/* → https://s40lp1.ucc.cit.tum.de
+    //   /sap/opu/odata4/sap/zsb_gsugp9/srvd_a2x/sap/zsr_registry/0001/*
+    BACKEND_URL: "/backend/",
 
-    // OData Version: "v2" or "v4"
-    // Most RAP services default to v4
+    // SAP client number for the TU Munich training system
+    SAP_CLIENT: "324",
+
+    // OData Version: confirmed v4 from metadata Version="4.0"
     ODATA_VERSION: "v4",
 
-    // Entity set mappings for OData binding
-    // Update these when connecting to actual RAP backend
+    // ─── Entity Sets — mapped from <EntityContainer> in OData metadata ─
+    // Namespace: com.sap.gateway.srvd_a2x.zsr_registry.v0001
     ENTITY_SETS: {
-      services: "Services",           // Mock: "services", RAP: "Services"
-      snapshots: "Snapshots",         // Mock: "snapshots", RAP: "Snapshots"
-      compareData: "CompareData",     // Mock: "compareData", RAP: "CompareData"
-      snapshotDetail: "SnapshotDetails", // Mock: "snapshotDetail", RAP: "SnapshotDetails"
+      registry: "Registry",   // OData Service Registry  (R/W/U, no delete)
+      version: "Version",    // Version snapshots        (read-only)
+      detail: "Detail",     // Structural analysis      (read-only)
+      log: "Log",        // Audit log                (read-only)
     },
 
-    // Authentication type: "None", "Basic", "OAuth", "SAML"
-    AUTH_TYPE: "None",
+    // Auth is handled entirely by the XSUAA approuter layer.
+    AUTH_TYPE: "xsuaa",
 
     // Request timeout in milliseconds
     REQUEST_TIMEOUT: 30000,
 
     // Enable request/response logging
-    DEBUG_MODE: false,
+    DEBUG_MODE: true,
 
     // ─── Helper Methods ────────────────────────────────────────────────
 
@@ -44,33 +46,35 @@ sap.ui.define([], function () {
     },
 
     /**
-     * Get entity set name for given resource
-     * @param {string} sResource - Resource key (e.g., "services", "snapshots")
-     * @returns {string} Entity set name
+     * Get entity set name for given resource key
+     * @param {string} sResource - Resource key (e.g. "registry", "version")
+     * @returns {string} OData entity set name
      */
     getEntitySet: function (sResource) {
       return this.ENTITY_SETS[sResource] || sResource;
     },
 
     /**
-     * Get OData model settings for component initialization
+     * Get OData v4 model settings for component initialization
      * @returns {Object} Model settings object
      */
     getODataModelSettings: function () {
       return {
-        type: "sap.ui.model.odata." + this.ODATA_VERSION + ".ODataModel",
+        type: "sap.ui.model.odata.v4.ODataModel",
         uri: this.BACKEND_URL,
         settings: {
-          defaultBindingMode: "TwoWay",
-          metadataUrlParams: { sap_theme: "sap_horizon" },
-          json: true,
-          timeout: this.REQUEST_TIMEOUT,
+          synchronizationMode: "None",
+          operationMode: "Server",
+          autoExpandSelect: true,
+          httpHeaders: {
+            "sap-client": this.SAP_CLIENT,
+          },
         },
       };
     },
 
     /**
-     * Get JSON model settings (for mock data)
+     * Get JSON model settings (for mock data fallback)
      * @returns {Object} Model settings object
      */
     getJSONModelSettings: function () {
@@ -87,12 +91,13 @@ sap.ui.define([], function () {
      */
     logConfiguration: function () {
       if (this.DEBUG_MODE) {
-        console.log("=== Data Service Configuration ===");
+        console.log("=== SAP09 Data Service Configuration ===");
         console.log("Backend Enabled:", this.isBackendEnabled());
-        console.log("Backend URL:", this.BACKEND_URL);
-        console.log("OData Version:", this.ODATA_VERSION);
-        console.log("Auth Type:", this.AUTH_TYPE);
-        console.log("Entity Sets:", this.ENTITY_SETS);
+        console.log("Backend URL    :", this.BACKEND_URL);
+        console.log("SAP Client     :", this.SAP_CLIENT);
+        console.log("OData Version  :", this.ODATA_VERSION);
+        console.log("Auth Type      :", this.AUTH_TYPE);
+        console.log("Entity Sets    :", this.ENTITY_SETS);
       }
     },
   };

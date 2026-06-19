@@ -11,3 +11,6 @@ dist/
 # Editor and OS files
 .idea/
 *.log
+
+# Local approuter secrets — NEVER commit real credentials
+approuter/default-env.json
