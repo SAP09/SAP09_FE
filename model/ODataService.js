@@ -1,6 +1,11 @@
 sap.ui.define(
-  ["sap/ui/model/odata/v2/ODataModel", "sap/ui/model/odata/v4/ODataModel", "odata/metadata/manager/model/Config"],
-  function (ODataModelV2, ODataModelV4, Config) {
+  [
+    "sap/ui/model/odata/v2/ODataModel",
+    "sap/ui/model/odata/v4/ODataModel",
+    "odata/metadata/manager/model/Config",
+    "odata/metadata/manager/model/SAPLoginService",
+  ],
+  function (ODataModelV2, ODataModelV4, Config, SAPLoginService) {
     "use strict";
 
     return {
@@ -21,6 +26,13 @@ sap.ui.define(
         var sSapClient    = Config.SAP_CLIENT;      // "324"
 
         var oModel;
+        var oHeaders = {
+          "sap-client": sSapClient,
+        };
+
+        if (Config.AUTH_TYPE === "basic-per-user" && SAPLoginService.isLoggedIn()) {
+          oHeaders["Authorization"] = SAPLoginService.getAuthHeader();
+        }
 
         if (sODataVersion === "v4") {
           // ── OData V4 Model ────────────────────────────────────────────────────
@@ -32,9 +44,7 @@ sap.ui.define(
             synchronizationMode: "None",
             operationMode:       "Server",
             autoExpandSelect:    true,
-            httpHeaders: {
-              "sap-client": sSapClient,
-            },
+            httpHeaders:         oHeaders,
           });
         } else {
           // ── OData V2 Model (fallback) ─────────────────────────────────────────
@@ -43,6 +53,7 @@ sap.ui.define(
             metadataUrlParams:  { "sap-client": sSapClient },
             json:               true,
             timeout:            Config.REQUEST_TIMEOUT,
+            headers:            oHeaders,
           });
         }
 

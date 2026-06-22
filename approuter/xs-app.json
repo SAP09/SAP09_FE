@@ -1,21 +1,19 @@
 {
   "welcomeFile": "/index.html",
-  "authenticationMethod": "route",
+  "authenticationMethod": "none",
   "routes": [
     {
       "source": "^/backend/(.*)$",
       "target": "/sap/opu/odata4/sap/zsb_gsugp9/srvd_a2x/sap/zsr_registry/0001/$1?sap-client=324",
       "destination": "backend",
-      "authenticationType": "xsuaa",
-      "scope": "$XSAPPNAME.Display",
+      "authenticationType": "none",
       "csrfProtection": false
     },
     {
       "source": "^/(.*)$",
       "target": "$1",
       "localDir": "resources",
-      "authenticationType": "xsuaa",
-      "scope": "$XSAPPNAME.Display"
+      "authenticationType": "none"
     }
   ]
 }

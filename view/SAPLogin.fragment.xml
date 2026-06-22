@@ -1,0 +1,47 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout">
+    <Dialog
+        id="sapLoginDialog"
+        title="Sign in to S/4HANA"
+        type="Message"
+        state="None"
+        stretch="false"
+        contentWidth="360px">
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <Text text="Please enter your SAP credentials to access S/4HANA OData services on s40lp1.ucc.cit.tum.de." class="sapUiSmallMarginBottom" />
+                <MessageStrip
+                    id="sapLoginErrorStrip"
+                    text="Invalid username or password"
+                    type="Error"
+                    showIcon="true"
+                    visible="false"
+                    class="sapUiSmallMarginBottom" />
+                <Label text="Username" required="true" labelFor="sapUsernameInput" />
+                <Input
+                    id="sapUsernameInput"
+                    placeholder="S/4HANA User (e.g. DEV-173)"
+                    width="100%"
+                    submit="onSAPLoginSubmit"
+                    class="sapUiSmallMarginBottom" />
+                <Label text="Password" required="true" labelFor="sapPasswordInput" />
+                <Input
+                    id="sapPasswordInput"
+                    type="Password"
+                    placeholder="Password"
+                    width="100%"
+                    submit="onSAPLoginSubmit" />
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                id="sapLoginSubmitBtn"
+                text="Sign In"
+                type="Emphasized"
+                press="onSAPLoginSubmit" />
+        </beginButton>
+    </Dialog>
+</core:FragmentDefinition>

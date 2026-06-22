@@ -1,4 +1,4 @@
-﻿<mvc:View
+<mvc:View
     controllerName="odata.metadata.manager.controller.Dashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
@@ -22,6 +22,19 @@
                     </HBox>
                 </contentLeft>
                 <contentRight>
+                    <Text
+                        id="txtSapUser"
+                        text="S/4HANA: {/sapUser}"
+                        visible="{/isBackend}"
+                        class="sapUiSmallMarginEnd" />
+                    <Button
+                        id="btnSignOut"
+                        icon="sap-icon://log"
+                        text="Sign Out"
+                        type="Transparent"
+                        visible="{/isBackend}"
+                        press="onSignOut"
+                        class="topBarBtn" />
                     <Button
                         id="btnExportAll"
                         icon="sap-icon://table-view"

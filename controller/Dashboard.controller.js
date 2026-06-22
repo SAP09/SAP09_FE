@@ -1,6 +1,6 @@
 sap.ui.define(
-  ["sap/ui/core/mvc/Controller", "sap/m/MessageToast"],
-  function (Controller, MessageToast) {
+  ["sap/ui/core/mvc/Controller", "sap/m/MessageToast", "odata/metadata/manager/model/SAPLoginService"],
+  function (Controller, MessageToast, SAPLoginService) {
     "use strict";
 
     return Controller.extend("odata.metadata.manager.controller.Dashboard", {
@@ -19,6 +19,14 @@ sap.ui.define(
       },
 
       // ─── Top-bar actions ───────────────────────────────────────────────
+      onSignOut: function () {
+        SAPLoginService.logout();
+        MessageToast.show("Logged out from S/4HANA");
+        setTimeout(function () {
+          window.location.reload();
+        }, 1000);
+      },
+
       onExportAll: function () {
         MessageToast.show("Exporting all versions…");
       },

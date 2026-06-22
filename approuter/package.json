@@ -4,7 +4,7 @@
   "private": true,
   "description": "SAP BTP approuter for SAP09_FE",
   "scripts": {
-    "start": "node node_modules/@sap/approuter/approuter.js"
+    "start": "node app.js"
   },
   "dependencies": {
     "@sap/approuter": "^22.0.1"

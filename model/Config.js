@@ -26,8 +26,8 @@ sap.ui.define([], function () {
       log: "Log",        // Audit log                (read-only)
     },
 
-    // Auth is handled entirely by the XSUAA approuter layer.
-    AUTH_TYPE: "xsuaa",
+    // Auth is handled per user via frontend login dialog forwarding credentials.
+    AUTH_TYPE: "basic-per-user",
 
     // Request timeout in milliseconds
     REQUEST_TIMEOUT: 30000,
