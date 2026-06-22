@@ -1,0 +1,52 @@
+{
+  "xsappname": "sap09-fe",
+  "tenant-mode": "dedicated",
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://7f4c3e60trial-dev-sap09-fe-approuter.cfapps.us10-001.hana.ondemand.com/login/callback"
+    ]
+  },
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Display",
+      "description": "Read-only access to the registry app"
+    },
+    {
+      "name": "$XSAPPNAME.Edit",
+      "description": "Read and write access to the registry app"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "Viewer",
+      "description": "Can view data only",
+      "scope-references": [
+        "$XSAPPNAME.Display"
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Can view and edit data",
+      "scope-references": [
+        "$XSAPPNAME.Display",
+        "$XSAPPNAME.Edit"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "SAP09-Viewer",
+      "description": "Read-only users of the Registry app",
+      "role-template-references": [
+        "$XSAPPNAME.Viewer"
+      ]
+    },
+    {
+      "name": "SAP09-Admin",
+      "description": "Admin users with full access to the Registry app",
+      "role-template-references": [
+        "$XSAPPNAME.Admin"
+      ]
+    }
+  ]
+}

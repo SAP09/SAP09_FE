@@ -1,0 +1,16 @@
+# Node.js dependencies
+node_modules/
+
+# Generated approuter resources
+approuter/resources/
+
+# Build artifacts
+mta_archives/
+dist/
+
+# Editor and OS files
+.idea/
+*.log
+
+# Local approuter secrets — NEVER commit real credentials
+approuter/default-env.json

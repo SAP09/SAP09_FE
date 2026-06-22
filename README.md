@@ -1,97 +1,102 @@
-# SAP09_FE - Hướng dẫn deploy lên SAP BTP
+# SAP09_FE - Deploy chuẩn SAP BTP
 
-Đây là một ứng dụng SAPUI5 frontend tĩnh. App hiện chạy trực tiếp từ `index.html` và tải SAPUI5 từ CDN, nên bạn có thể deploy theo kiểu static web app lên SAP BTP Cloud Foundry mà không cần backend.
+Ứng dụng này là SAPUI5 frontend, nhưng để đi đúng hướng BTP thì nên có một lớp `approuter` + `xsuaa` ở phía trước. Cách này cho phép:
 
-## Bộ file đã thêm
+- redirect đăng nhập chuẩn SAP BTP,
+- bảo vệ app bằng authentication/authorization,
+- sẵn đường để đưa vào Launchpad / Work Zone sau này,
+- giữ nguyên code UI5 hiện tại, không phải viết lại app.
 
-- `package.json`: script chạy local bằng `serve`.
-- `manifest.yml`: cấu hình push app lên Cloud Foundry.
-- `Staticfile`: bật `pushstate` để refresh/deep link không bị lỗi.
-- `.cfignore`: loại trừ các thư mục không cần thiết khi deploy.
+## Cấu trúc deploy hiện tại
 
-## Yêu cầu trước khi deploy
-
-1. Cài Node.js 18 hoặc mới hơn.
-2. Cài Cloud Foundry CLI.
-3. Đăng nhập vào SAP BTP subaccount có Cloud Foundry environment.
-4. Nếu chưa có, tạo Cloud Foundry org và space trong subaccount.
+- `approuter/`: runtime Node.js để serve app và xử lý redirect auth.
+- `xs-security.json`: khai báo app scopes / role templates cho `xsuaa`.
+- `mta.yaml`: cấu hình build và deploy chuẩn Cloud Foundry.
+- `scripts/prepare-approuter.mjs`: copy asset UI5 hiện tại sang `approuter/resources` trước khi build.
 
 ## Chạy local
 
-1. Mở terminal tại thư mục dự án.
-2. Cài dependency:
-
 ```bash
 npm install
-```
-
-3. Chạy app local:
-
-```bash
 npm start
 ```
 
-4. Mở trình duyệt tại `http://localhost:8080`.
+Mở `http://localhost:8080`.
 
-## Deploy lên SAP BTP Cloud Foundry
+Nếu muốn kiểm tra approuter cục bộ:
 
-### Bước 1: Đăng nhập CF
+```bash
+npm run install:approuter
+npm run prepare:approuter
+npm run start:approuter
+```
+
+## Deploy chuẩn BTP
+
+### 1. Cài công cụ cần thiết
+
+```bash
+npm install -g mbt
+```
+
+Bạn cũng cần Cloud Foundry CLI đã đăng nhập vào subaccount có Cloud Foundry environment.
+
+### 2. Cài dependency
+
+```bash
+npm install
+npm run install:approuter
+```
+
+### 3. Chuẩn bị tài nguyên cho approuter
+
+```bash
+npm run prepare:approuter
+```
+
+Lệnh này copy toàn bộ asset UI5 cần thiết vào `approuter/resources` để approuter có thể serve app.
+
+### 4. Build MTA
+
+```bash
+mbt build
+```
+
+### 5. Deploy lên Cloud Foundry
 
 ```bash
 cf login -a https://api.cf.<region>.hana.ondemand.com
-```
-
-Thay `<region>` bằng region của subaccount, ví dụ `eu10`, `ap21`, `us10`.
-
-### Bước 2: Chọn org và space
-
-```bash
 cf target -o <org-name> -s <space-name>
+cf deploy mta_archives/sap09-fe_1.0.0.mtar
 ```
 
-### Bước 3: Push app
+Sau khi deploy xong, mở route của approuter. Truy cập lần đầu sẽ được chuyển sang màn hình login của XSUAA, đăng nhập xong sẽ quay lại app.
 
-```bash
-cf push -f manifest.yml
-```
+## Luồng auth/redirect
 
-### Bước 4: Lấy URL ứng dụng
+1. Người dùng mở URL app trên BTP.
+2. `approuter` kiểm tra request.
+3. Nếu chưa có token hợp lệ, `approuter` redirect sang `xsuaa`.
+4. Người dùng đăng nhập thành công.
+5. `xsuaa` trả về token, `approuter` nhận token và trả app về trình duyệt.
 
-```bash
-cf apps
-```
+## Nếu bạn cần Launchpad / Work Zone
 
-Mở URL của app `sap09-fe` trong trình duyệt.
-
-## Cách hoạt động của app trên BTP
-
-- `index.html` vẫn bootstrap SAPUI5 từ `https://ui5.sap.com`.
-- Ứng dụng chỉ cần host tĩnh, nên Cloud Foundry staticfile buildpack là đủ.
-- `Staticfile` với `pushstate: enabled` giúp các route nội bộ của UI5 không bị lỗi khi refresh.
-
-## Nếu bạn muốn deploy theo chuẩn HTML5 Apps Repo / Launchpad
-
-Luồng hiện tại là cách nhanh nhất để chạy app trên BTP. Nếu bạn cần:
-
-- hiển thị trong SAP Build Work Zone hoặc Fiori Launchpad,
-- tách runtime/app router rõ hơn,
-- hoặc gắn destination/backend OData thật,
-
-thì nên chuyển sang mô hình `mta.yaml` + HTML5 App Repository + Approuter. Tôi có thể tạo tiếp bộ file đó cho bạn.
+Phần còn thiếu tiếp theo là đăng ký app vào content provider của Launchpad và tạo tile/target mapping. Bộ khung hiện tại đã đúng hướng để đi tiếp bước đó.
 
 ## Troubleshooting
 
-### App mở trắng hoặc lỗi route khi refresh
+### 404 khi refresh
 
-- Kiểm tra file `Staticfile` có `pushstate: enabled`.
-- Đảm bảo deploy bằng `cf push -f manifest.yml` từ thư mục gốc dự án.
+- Chạy lại `npm run prepare:approuter` trước khi build.
+- Kiểm tra `approuter/xs-app.json` có `welcomeFile` và `localDir` đúng.
 
-### Không tải được UI5
+### Không vào được login
 
-- Kiểm tra máy có truy cập được `https://ui5.sap.com`.
-- Nếu môi trường hạn chế mạng ngoài, cần bundle UI5 theo cách khác.
+- Kiểm tra `xsuaa` đã được tạo cùng `mta`.
+- Đảm bảo user của bạn đã được gán role collection phù hợp trong BTP cockpit.
 
-### Lỗi thiếu dependency khi chạy local
+### Không tìm thấy `mbt`
 
-- Chạy lại `npm install`.
-- Kiểm tra Node.js >= 18.
+- Cài lại bằng `npm install -g mbt`.
+- Mở terminal mới rồi chạy lại `mbt build`.
