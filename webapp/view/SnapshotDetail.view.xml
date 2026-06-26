@@ -118,10 +118,10 @@
                                     <Text text="Approvals (nav)" class="treeNodeLabel treeNodeLabel-sm" />
                                 </HBox>
 
-                                <HBox class="treeNode" id="treeNode_POItemSet" press="onTreeNodePress">
+                                <Button class="treeNode" id="treeNode_POItemSet" press="onTreeNodePress">
                                     <core:Icon src="sap-icon://table-view" size="0.75rem" class="treeNodeIcon" />
                                     <Text text="PurchaseOrderItemSet" class="treeNodeLabel" />
-                                </HBox>
+                                </Button>
                                 <HBox class="treeNode treeNode-indent1">
                                     <core:Icon src="sap-icon://key" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
                                     <Text text="ItemNumber" class="treeNodeLabel treeNodeLabel-sm" />
