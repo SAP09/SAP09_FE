@@ -1,9 +1,6 @@
 # Node.js dependencies
 node_modules/
 
-# Generated approuter resources
-approuter/resources/
-
 # Build artifacts
 mta_archives/
 dist/
@@ -14,3 +11,14 @@ dist/
 
 # Local approuter secrets — NEVER commit real credentials
 approuter/default-env.json
+
+node_modules/
+dist/
+.scp/
+.env
+Makefile*.mta
+mta_archives
+mta-*
+resources
+archive.zip
+.*_mta_build_tmp

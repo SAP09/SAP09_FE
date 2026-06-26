@@ -1,18 +1,12 @@
-# SAP09_FE - Deploy chuẩn SAP BTP
+# SAP09_FE - Deploy trực tiếp không dùng Approuter
 
-Ứng dụng này là SAPUI5 frontend, nhưng để đi đúng hướng BTP thì nên có một lớp `approuter` + `xsuaa` ở phía trước. Cách này cho phép:
+Ứng dụng này hiện đang được cấu hình để chạy trực tiếp từ `webapp/` và kết nối tới backend SAP bằng Basic Auth.
 
-- redirect đăng nhập chuẩn SAP BTP,
-- bảo vệ app bằng authentication/authorization,
-- sẵn đường để đưa vào Launchpad / Work Zone sau này,
-- giữ nguyên code UI5 hiện tại, không phải viết lại app.
+## Điều kiện cần
 
-## Cấu trúc deploy hiện tại
-
-- `approuter/`: runtime Node.js để serve app và xử lý redirect auth.
-- `xs-security.json`: khai báo app scopes / role templates cho `xsuaa`.
-- `mta.yaml`: cấu hình build và deploy chuẩn Cloud Foundry.
-- `scripts/prepare-approuter.mjs`: copy asset UI5 hiện tại sang `approuter/resources` trước khi build.
+- `webapp/model/Config.js` phải dùng URL backend trực tiếp.
+- Nếu bạn deploy lên server nội bộ, server đó cần phục vụ các file tĩnh từ `dist/`.
+- Nếu backend không nằm cùng nguồn gốc với app, bạn phải cấu hình CORS cho SAP hoặc dùng reverse proxy trên server.
 
 ## Chạy local
 
@@ -21,82 +15,63 @@ npm install
 npm start
 ```
 
-Mở `http://localhost:8080`.
+Mở browser tại `http://localhost:8080` hoặc URL được in ra.
 
-Nếu muốn kiểm tra approuter cục bộ:
-
-```bash
-npm run install:approuter
-npm run prepare:approuter
-npm run start:approuter
-```
-
-## Deploy chuẩn BTP
-
-### 1. Cài công cụ cần thiết
+## Build tĩnh
 
 ```bash
-npm install -g mbt
+npm run build
 ```
 
-Bạn cũng cần Cloud Foundry CLI đã đăng nhập vào subaccount có Cloud Foundry environment.
+Kết quả sẽ nằm trong thư mục `dist/`.
 
-### 2. Cài dependency
+## Deploy lên server trường (BSP/ABAP Repository)
+
+1. Build app:
 
 ```bash
-npm install
-npm run install:approuter
+npm run build
 ```
 
-### 3. Chuẩn bị tài nguyên cho approuter
+2. Dùng transaction `/UI5/UI5_REPOSITORY_LOAD` hoặc SE80 để import nội dung `dist/` vào BSP application/public area.
 
-```bash
-npm run prepare:approuter
+3. Tạo BSP application mới hoặc dùng application hiện có trong ABAP Repository.
+
+4. Chọn transport request và deploy toàn bộ file `dist/`.
+
+5. Run app từ URL ABAP như:
+
+```
+https://<sap-host>/sap/bc/ui5_ui5/sap/<application_name>/index.html
 ```
 
-Lệnh này copy toàn bộ asset UI5 cần thiết vào `approuter/resources` để approuter có thể serve app.
+## Cấu hình backend cùng origin
 
-### 4. Build MTA
+Khi app chạy trên cùng server SAP, không cần CORS hoặc proxy.
 
-```bash
-mbt build
-```
+Mở `webapp/model/Config.js` và đảm bảo:
 
-### 5. Deploy lên Cloud Foundry
+- `BACKEND_ENABLED: true`
+- `BACKEND_URL: "/sap/opu/odata4/sap/zsb_gsugp9/srvd_a2x/sap/zsr_registry/0001/"`
+- `AUTH_TYPE: "basic-per-user"`
 
-```bash
-cf login -a https://api.cf.<region>.hana.ondemand.com
-cf target -o <org-name> -s <space-name>
-cf deploy mta_archives/sap09-fe_1.0.0.mtar
-```
+Trong trường hợp backend và app cùng host, URI tương đối `/sap/opu/odata4/...` sẽ hoạt động đúng.
 
-Sau khi deploy xong, mở route của approuter. Truy cập lần đầu sẽ được chuyển sang màn hình login của XSUAA, đăng nhập xong sẽ quay lại app.
+## Lưu ý cho BSP/ABAP
 
-## Luồng auth/redirect
+- Nếu dùng namespace BSP, tên app nên bắt đầu bằng `Z` hoặc `Y`.
+- `index.html` và `manifest.json` phải nằm trong root của BSP app.
+- App gọi backend trực tiếp bằng `Basic Auth` qua `SAPLoginService`.
 
-1. Người dùng mở URL app trên BTP.
-2. `approuter` kiểm tra request.
-3. Nếu chưa có token hợp lệ, `approuter` redirect sang `xsuaa`.
-4. Người dùng đăng nhập thành công.
-5. `xsuaa` trả về token, `approuter` nhận token và trả app về trình duyệt.
+## Những file đã bỏ
 
-## Nếu bạn cần Launchpad / Work Zone
+- `webapp/approuter/`
+- `webapp/mta.yaml`
+- `webapp/xs-security.json`
+- `webapp/manifest.yml`
+- `webapp/scripts/prepare-approuter.mjs`
 
-Phần còn thiếu tiếp theo là đăng ký app vào content provider của Launchpad và tạo tile/target mapping. Bộ khung hiện tại đã đúng hướng để đi tiếp bước đó.
+## Lưu ý
 
-## Troubleshooting
-
-### 404 khi refresh
-
-- Chạy lại `npm run prepare:approuter` trước khi build.
-- Kiểm tra `approuter/xs-app.json` có `welcomeFile` và `localDir` đúng.
-
-### Không vào được login
-
-- Kiểm tra `xsuaa` đã được tạo cùng `mta`.
-- Đảm bảo user của bạn đã được gán role collection phù hợp trong BTP cockpit.
-
-### Không tìm thấy `mbt`
-
-- Cài lại bằng `npm install -g mbt`.
-- Mở terminal mới rồi chạy lại `mbt build`.
+- App vẫn dùng login Basic Auth trong frontend nếu `AUTH_TYPE` là `basic-per-user`.
+- `manifest.json` hiện tại chỉ dùng cho metadata và cấu hình app; luồng auth đã trở thành frontend-based.
