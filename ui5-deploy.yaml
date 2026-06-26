@@ -1,0 +1,18 @@
+builder:
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        verbose: true
+        target:
+          url: "https://s40lp1.ucc.cit.tum.de"
+          client: "324"
+          useStrictSSL: false
+
+        app:
+          name: "ZTHESIS_UI5"
+          description: "Do an tot nghiep UI5"
+          package: "$TMP"
+          transport: ""
+
+        exclude: []

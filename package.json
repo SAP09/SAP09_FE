@@ -1,22 +1,35 @@
 {
-  "name": "sap09-fe",
-  "version": "1.0.0",
+  "name": "odata.metadata.manager",
+  "version": "0.0.1",
   "private": true,
   "description": "SAP UI5 frontend for OData Metadata Manager",
   "scripts": {
-    "start": "serve -s . -l 8080",
     "start:preview": "serve -s . -l 5000",
-    "prepare:approuter": "node scripts/prepare-approuter.mjs",
-    "install:approuter": "npm install --prefix approuter",
-    "start:approuter": "npm --prefix approuter start",
-    "deploy:static": "cf push -f manifest.yml",
-    "build:mta": "npm run prepare:approuter && mbt build",
-    "deploy:mta": "npm run build:mta && cf deploy mta_archives/sap09-fe_1.0.0.mtar"
+    "start_old": "serve -s . -l 8080",
+    "start": "fiori run --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#ODataMetadataManager-display\"",
+    "start-local": "fiori run --config ./ui5-local.yaml --open \"test/flpSandboxMockServer.html?sap-ui-xx-viewCache=false#ODataMetadataManager-display\"",
+    "start-noflp": "fiori run --open \"index.html?sap-ui-xx-viewCache=false\"",
+    "start-variants-management": "fiori run --open \"preview.html?sap-ui-xx-viewCache=false&fiori-tools-rta-mode=true&sap-ui-rta-skip-flex-validation=true#preview-app\"",
+    "build": "ui5 build -a --clean-dest --include-task=generateCachebusterInfo",
+    "deploy": "npx fiori deploy --config ui5-deploy.yaml",
+    "deploy-config": "fiori add deploy-config",
+    "start-mock": "fiori run --config ./ui5-mock.yaml --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#ODataMetadataManager-display\""
   },
   "devDependencies": {
-    "serve": "^14.2.4"
+    "serve": "^14.2.4",
+    "@ui5/cli": "^4.0.0",
+    "@sap/ux-ui5-tooling": "1",
+    "rimraf": "6.0.1",
+    "@sap-ux/ui5-middleware-fe-mockserver": "2"
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "sapuxLayer": "CUSTOMER_BASE",
+  "keywords": [
+    "ui5",
+    "openui5",
+    "sapui5"
+  ],
+  "main": "webapp/index.html"
 }

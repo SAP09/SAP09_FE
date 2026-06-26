@@ -1,8 +1,0 @@
-applications:
-  - name: sap09-fe
-    path: .
-    memory: 64M
-    buildpacks:
-      - staticfile_buildpack
-    env:
-      FORCE_HTTPS: true
