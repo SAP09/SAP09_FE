@@ -7,7 +7,7 @@
     height="100%"
     displayBlock="true">
 
-    <Page id="versionDetailPage" showHeader="true" class="versionDetailPage">
+    <Page id="versionDetailPage" showHeader="true" enableScrolling="false" class="versionDetailPage">
 
         <!-- ═══════ TOP BAR ═══════ -->
         <customHeader>
@@ -15,11 +15,11 @@
                 <contentLeft>
                     <Button icon="sap-icon://nav-back" press="onNavBack" class="backBtn" />
                     <core:Icon src="sap-icon://camera" size="1.125rem" class="topBarIcon" />
-                    <Title text="Version v7" class="topBarTitle" />
-                    <Text text="🤖 Auto"     class="badge badge-auto"     />
-                    <Text text="V2"           class="badge badge-v2"       />
-                    <Text text="ZI"           class="badge badge-zi"       />
-                    <Text text="Immutable"    class="badge badge-active"   />
+                    <Title id="versionTitle" text="Version" class="topBarTitle" />
+                    <Text id="badgeTrigger" text="—" class="badge badge-auto" />
+                    <Text id="badgeVersionType" text="—" class="badge badge-v2" />
+                    <Text id="badgePrefix" text="—" class="badge badge-zi" />
+                    <Text id="badgeStatus" text="—" class="badge badge-active" />
                 </contentLeft>
                 <contentRight>
                     <Button icon="sap-icon://compare"  text="Compare to…"  press="onCompareTo"      class="topBarBtn" />
@@ -34,28 +34,28 @@
                 <!-- ═══════ METADATA ROW ═══════ -->
                 <HBox class="metaRow" alignItems="Stretch">
                     <VBox class="metaCell">
-                        <Text text="SERVICE"       class="metaCellLabel" />
-                        <Text text="ZMM_PURCHASE_SRV" class="metaCellValue" />
+                        <Text text="SERVICE" class="metaCellLabel" />
+                        <Text id="metaService" text="—" class="metaCellValue" />
                     </VBox>
                     <VBox class="metaCell">
                         <Text text="VERSION DATE" class="metaCellLabel" />
-                        <Text text="Today 06:00"   class="metaCellValue" />
+                        <Text id="metaDate" text="—" class="metaCellValue" />
                     </VBox>
                     <VBox class="metaCell">
-                        <Text text="CREATED BY"    class="metaCellLabel" />
-                        <Text text="SYSTEM (auto)" class="metaCellValue" />
+                        <Text text="CREATED BY" class="metaCellLabel" />
+                        <Text id="metaCreatedBy" text="—" class="metaCellValue" />
                     </VBox>
                     <VBox class="metaCell">
-                        <Text text="TRANSPORT"     class="metaCellLabel" />
-                        <Text text="TR#K9A002"     class="metaCellValue metaMono" />
+                        <Text text="TRANSPORT" class="metaCellLabel" />
+                        <Text id="metaTransport" text="—" class="metaCellValue metaMono" />
                     </VBox>
                     <VBox class="metaCell">
-                        <Text text="TRIGGERING APP"    class="metaCellLabel" />
-                        <Text text="ZMM_PURCHASE_UI"   class="metaCellValue" />
+                        <Text text="TRIGGERING APP" class="metaCellLabel" />
+                        <Text id="metaTriggeringApp" text="—" class="metaCellValue" />
                     </VBox>
                     <VBox class="metaCell">
-                        <Text text="HASH"             class="metaCellLabel" />
-                        <Text text="a4f8c2d1…"        class="metaCellValue metaMono" />
+                        <Text text="HASH" class="metaCellLabel" />
+                        <Text id="metaHash" text="—" class="metaCellValue metaMono" />
                     </VBox>
                 </HBox>
 
@@ -68,7 +68,7 @@
                         <!-- Panel header -->
                         <HBox class="entityPanelHeader" alignItems="Center">
                             <core:Icon src="sap-icon://tree" size="0.875rem" class="entityPanelIcon" />
-                            <Text text="Entity tree · v7" class="entityPanelTitle" />
+                            <Text id="entityTreeTitle" text="Entity tree" class="entityPanelTitle" />
                         </HBox>
 
                         <!-- Search -->
@@ -81,104 +81,7 @@
 
                         <!-- Scrollable tree -->
                         <ScrollContainer vertical="true" horizontal="false" class="entityTreeScroll">
-                            <VBox id="entityTreeContainer" class="entityTree">
-
-                                <!-- Section: Entity Types -->
-                                <Text text="ENTITY TYPES (14)" class="treeSectionHeader" />
-
-                                <Button class="treeNode treeNode-active treeNodeBtn" id="treeNode_PurchaseOrderSet" press="onTreeNodePress">
-                                    <customData><core:CustomData key="xmlLine" value="8" /></customData>
-                                </Button>
-                                <HBox class="treeNode treeNode-active treeNodeDisplay" id="treeNode_PurchaseOrderSet_lbl">
-                                    <core:Icon src="sap-icon://table-view" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="PurchaseOrderSet" class="treeNodeLabel" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1" id="treeNode_PurchaseOrder">
-                                    <core:Icon src="sap-icon://key" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="PurchaseOrder" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1" id="treeNode_CompanyCode">
-                                    <core:Icon src="sap-icon://bullet-text" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="CompanyCode" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1" id="treeNode_Vendor">
-                                    <core:Icon src="sap-icon://bullet-text" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="Vendor" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1" id="treeNode_TotalAmount">
-                                    <core:Icon src="sap-icon://bullet-text" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="TotalAmount" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1 treeNode-nav" id="treeNode_Items">
-                                    <core:Icon src="sap-icon://arrow-right" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="Items (nav)" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1 treeNode-nav" id="treeNode_Approvals">
-                                    <core:Icon src="sap-icon://arrow-right" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="Approvals (nav)" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-
-                                <Button class="treeNode" id="treeNode_POItemSet" press="onTreeNodePress">
-                                    <core:Icon src="sap-icon://table-view" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="PurchaseOrderItemSet" class="treeNodeLabel" />
-                                </Button>
-                                <HBox class="treeNode treeNode-indent1">
-                                    <core:Icon src="sap-icon://key" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="ItemNumber" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1">
-                                    <core:Icon src="sap-icon://bullet-text" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="Material" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-indent1">
-                                    <core:Icon src="sap-icon://bullet-text" size="0.625rem" class="treeNodeIcon treeNodeIcon-sm" />
-                                    <Text text="Quantity" class="treeNodeLabel treeNodeLabel-sm" />
-                                </HBox>
-
-                                <HBox class="treeNode treeNode-new" id="treeNode_BPSet">
-                                    <core:Icon src="sap-icon://table-view" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="BusinessPartnerSet" class="treeNodeLabel" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-new" id="treeNode_ApprovalStepSet">
-                                    <core:Icon src="sap-icon://table-view" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="ApprovalStepSet" class="treeNodeLabel" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-new" id="treeNode_AddressSet">
-                                    <core:Icon src="sap-icon://table-view" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="AddressSet" class="treeNodeLabel" />
-                                </HBox>
-
-                                <!-- Section: Associations -->
-                                <Text text="ASSOCIATIONS (11)" class="treeSectionHeader" />
-                                <HBox class="treeNode">
-                                    <core:Icon src="sap-icon://chain-link" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="PO_Items_Assoc" class="treeNodeLabel" />
-                                </HBox>
-                                <HBox class="treeNode">
-                                    <core:Icon src="sap-icon://chain-link" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="PO_Partner_Assoc" class="treeNodeLabel" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-new">
-                                    <core:Icon src="sap-icon://chain-link" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="PO_Approval_Assoc" class="treeNodeLabel" />
-                                </HBox>
-
-                                <!-- Section: Functions -->
-                                <Text text="FUNCTIONS (4)" class="treeSectionHeader" />
-                                <HBox class="treeNode">
-                                    <core:Icon src="sap-icon://fx" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="GetOpenOrders" class="treeNodeLabel" />
-                                </HBox>
-                                <HBox class="treeNode">
-                                    <core:Icon src="sap-icon://fx" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="ConfirmDelivery" class="treeNodeLabel" />
-                                </HBox>
-                                <HBox class="treeNode treeNode-new">
-                                    <core:Icon src="sap-icon://fx" size="0.75rem" class="treeNodeIcon" />
-                                    <Text text="GetApprovalStatus" class="treeNodeLabel" />
-                                </HBox>
-
-                            </VBox>
+                            <VBox id="entityTreeContainer" class="entityTree" />
                         </ScrollContainer>
                     </VBox>
 
@@ -198,29 +101,7 @@
                                     icon="sap-icon://source-code"
                                     text="Raw XML">
                                     <content>
-                                        <VBox class="xmlPaneWrapper">
-                                            <!-- XML Toolbar -->
-                                            <HBox class="xmlToolbar" alignItems="Center">
-                                                <SearchField
-                                                    id="xmlSearch"
-                                                    placeholder="Search in XML…"
-                                                    width="220px"
-                                                    liveChange="onXmlSearch"
-                                                    class="xmlSearchField" />
-                                                <ToolbarSpacer />
-                                                <Button icon="sap-icon://copy" text="Copy"  press="onCopyXml" class="xmlToolbarBtn" />
-                                                <Button icon="sap-icon://text-formatting" text="Wrap" press="onToggleWrap" class="xmlToolbarBtn" id="btnWrap" />
-                                            </HBox>
-
-                                            <!-- XML Lines - rendered via HTML control -->
-                                            <ScrollContainer
-                                                id="xmlScrollContainer"
-                                                vertical="true"
-                                                horizontal="true"
-                                                class="xmlScrollArea">
-                                                <VBox id="xmlLinesContainer" class="xmlLinesContainer" />
-                                            </ScrollContainer>
-                                        </VBox>
+                                        <core:HTML id="xmlHtmlControl" preferDOM="true" />
                                     </content>
                                 </IconTabFilter>
 
@@ -233,7 +114,7 @@
                                     <content>
                                         <ScrollContainer vertical="true" horizontal="false" class="wfScrollArea">
                                             <VBox class="workflowPane">
-                                                <Text text="Version v7 — event chain that triggered this capture" class="wfPaneSubtitle" />
+                                                <Text id="wfPaneSubtitle" text="Event chain that triggered this capture" class="wfPaneSubtitle" />
 
                                                 <!-- Step 1: Transport released -->
                                                 <HBox class="wfStep" alignItems="Start">

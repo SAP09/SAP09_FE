@@ -1,163 +1,266 @@
 sap.ui.define(
   [
-    "sap/ui/model/odata/v2/ODataModel",
-    "sap/ui/model/odata/v4/ODataModel",
     "odata/metadata/manager/model/Config",
     "odata/metadata/manager/model/SAPLoginService",
   ],
-  function (ODataModelV2, ODataModelV4, Config, SAPLoginService) {
+  function (Config, SAPLoginService) {
     "use strict";
+
+    // Fully-qualified namespace prefix used for all bound action URLs
+    var NAMESPACE = "com.sap.gateway.srvd_a2x.zsr_registry.v0001";
 
     return {
       /**
-       * Create an ODataService instance wired to the SAP backend directly.
-       * Authentication is handled by the frontend using Basic auth.
+       * Create a fetch-based OData v4 service instance.
+       * All methods return native Promises.
        *
-       * Backend: https://s40lp1.ucc.cit.tum.de
-       * Service: /sap/opu/odata4/sap/zsb_gsugp9/srvd_a2x/sap/zsr_registry/0001/
-       *
-       * @param {sap.ui.core.UIComponent} oComponent - Component reference
-       * @returns {Object} Service object with read/create/update/delete/query methods
+       * @param {sap.ui.core.UIComponent} oComponent - Component reference (unused but kept for API compat)
+       * @returns {Object} Service object
        */
       createInstance: function (oComponent) {
-        var sODataVersion = Config.ODATA_VERSION;   // "v4"
-        var sBackendUrl   = Config.BACKEND_URL;     // "/backend/"
-        var sSapClient    = Config.SAP_CLIENT;      // "324"
+        var sBaseUrl = Config.BACKEND_URL.replace(/\/$/, ""); // strip trailing slash
+        var sSapClient = Config.SAP_CLIENT;
 
-        var oModel;
-        var oHeaders = {
-          "sap-client": sSapClient,
-        };
+        // ─── Private helpers ──────────────────────────────────────────────
 
-        if (Config.AUTH_TYPE === "basic-per-user" && SAPLoginService.isLoggedIn()) {
-          oHeaders["Authorization"] = SAPLoginService.getAuthHeader();
+        /**
+         * Build request headers, optionally adding X-CSRF-Token: Fetch
+         */
+        function _headers(bFetchCsrf) {
+          var h = {
+            Accept: "application/json",
+            "sap-client": sSapClient,
+          };
+          if (SAPLoginService.isLoggedIn()) {
+            h["Authorization"] = SAPLoginService.getAuthHeader();
+          }
+          if (bFetchCsrf) {
+            h["X-CSRF-Token"] = "Fetch";
+          }
+          return h;
         }
 
-        if (sODataVersion === "v4") {
-          // ── OData V4 Model ────────────────────────────────────────────────────
-          // serviceUrl is passed inside the settings object (not as the first arg).
-          // v2-only options (json, metadataUrlParams, defaultBindingMode, timeout)
-          // must NOT be passed to the v4 constructor — they cause silent failures.
-          oModel = new ODataModelV4({
-            serviceUrl:          sBackendUrl,
-            synchronizationMode: "None",
-            operationMode:       "Server",
-            autoExpandSelect:    true,
-            httpHeaders:         oHeaders,
-          });
-        } else {
-          // ── OData V2 Model (fallback) ─────────────────────────────────────────
-          oModel = new ODataModelV2(sBackendUrl, {
-            defaultBindingMode: "TwoWay",
-            metadataUrlParams:  { "sap-client": sSapClient },
-            json:               true,
-            timeout:            Config.REQUEST_TIMEOUT,
-            headers:            oHeaders,
+        /**
+         * Execute a GET request; rejects on non-2xx status.
+         * @param {string} sPath - relative path (starts with /)
+         * @returns {Promise<Object>} Parsed JSON body
+         */
+        function _get(sPath) {
+          return fetch(sBaseUrl + sPath, {
+            method: "GET",
+            headers: _headers(false),
+          }).then(function (res) {
+            if (!res.ok) {
+              return res.text().then(function (txt) {
+                throw new Error("GET " + sPath + " → HTTP " + res.status + " " + txt);
+              });
+            }
+            return res.json();
           });
         }
+
+        /**
+         * Fetch a CSRF token required for write operations.
+         * @returns {Promise<string>} CSRF token value
+         */
+        function _getCsrfToken() {
+          return fetch(sBaseUrl + "/", {
+            method: "GET",
+            headers: _headers(true),
+          }).then(function (res) {
+            return res.headers.get("X-CSRF-Token") || "";
+          });
+        }
+
+        /**
+         * Execute a POST (bound action). Fetches CSRF token first.
+         * @param {string} sPath  - relative action URL
+         * @param {Object} [oBody] - optional JSON payload
+         * @returns {Promise<Object>} Parsed JSON response body
+         */
+        function _post(sPath, oBody) {
+          return _getCsrfToken().then(function (sToken) {
+            var h = _headers(false);
+            h["Content-Type"] = "application/json";
+            if (sToken) {
+              h["X-CSRF-Token"] = sToken;
+            }
+            return fetch(sBaseUrl + sPath, {
+              method: "POST",
+              headers: h,
+              body: oBody ? JSON.stringify(oBody) : "{}",
+            });
+          }).then(function (res) {
+            if (!res.ok) {
+              return res.text().then(function (txt) {
+                throw new Error("POST " + sPath + " → HTTP " + res.status + " " + txt);
+              });
+            }
+            return res.json();
+          });
+        }
+
+        // ─── Public API ────────────────────────────────────────────────────
 
         return {
           /**
-           * Verify the backend is reachable.
-           * For OData v4 the model loads metadata lazily on first binding;
-           * readiness is signalled immediately so the router can start.
+           * Fetch all Registry entries, each with their child Versions.
+           * Used by Component.js on startup to populate the main JSONModel.
            *
-           * @param {Function} fnSuccess - Called when service is ready
-           * @param {Function} fnError   - Called on metadata failure (v2 only)
+           * GET /Registry?$expand=_Version&$orderby=LastChangeAt desc
+           * @returns {Promise<{value: Array}>}
+           */
+          fetchRegistry: function () {
+            return _get("/Registry?$expand=_Version&$orderby=LastChangeAt desc");
+          },
+
+          /**
+           * Fetch all Versions for a given Group, each with their child Details.
+           * Used by SnapshotDetail and VersionCompare to resolve DetailIds.
+           *
+           * GET /Version?$filter=GroupId eq <guid>&$expand=_Detail&$orderby=VersionNo desc
+           * @param {string} sGroupId - GroupId GUID string (no quotes)
+           * @returns {Promise<{value: Array}>}
+           */
+          fetchVersionsForGroup: function (sGroupId) {
+            return _get(
+              "/Version?$filter=GroupId eq " +
+                sGroupId +
+                "&$expand=_Detail&$orderby=VersionNo desc"
+            );
+          },
+
+          /**
+           * Call the bound action getParseMetadata on a Detail entity.
+           * Returns the raw $metadata XML for that version snapshot.
+           *
+           * POST /Detail(DetailId=<guid>)/NAMESPACE.getParseMetadata
+           * @param {string} sDetailId - DetailId GUID string
+           * @returns {Promise<{DetailId: string, MetadataXml: string}>}
+           */
+          fetchDetailXml: function (sDetailId) {
+            return _post(
+              "/Detail(DetailId=" + sDetailId + ")/" + NAMESPACE + ".getParseMetadata"
+            );
+          },
+
+          /**
+           * Call the bound Compare action on a Detail entity.
+           * Returns full structural + XML diff between two snapshots.
+           *
+           * POST /Detail(DetailId=<guid>)/NAMESPACE.Compare
+           * Body: { compare_detail_id: <guid> }
+           *
+           * @param {string} sDetailId        - Base detail ID
+           * @param {string} sCompareDetailId - Compare-against detail ID
+           * @returns {Promise<ZDDETAILCOMPARERESULT>}
+           */
+          compareDetails: function (sDetailId, sCompareDetailId) {
+            return _post(
+              "/Detail(DetailId=" + sDetailId + ")/" + NAMESPACE + ".Compare",
+              { compare_detail_id: sCompareDetailId }
+            );
+          },
+
+          /**
+           * Call the bound generateVersion action on a Registry entity.
+           * Triggers a manual snapshot for the given service group.
+           *
+           * POST /Registry(GroupId=<guid>)/NAMESPACE.generateVersion
+           * @param {string} sGroupId - GroupId GUID string
+           * @returns {Promise<ZI_VERSION_RESULT>}
+           */
+          generateVersion: function (sGroupId) {
+            return _post(
+              "/Registry(GroupId=" + sGroupId + ")/" + NAMESPACE + ".generateVersion"
+            );
+          },
+
+          /**
+           * Map a raw Registry response value array into the JSONModel shape
+           * expected by all views (services[], with nested versions[]).
+           *
+           * @param {Array} aRegistries - value array from fetchRegistry()
+           * @returns {Array} Mapped services array
+           */
+          mapRegistryToServices: function (aRegistries) {
+            return aRegistries.map(function (reg) {
+              // Sort versions descending by VersionNo (numeric)
+              var aVersions = (reg._Version || []).slice().sort(function (a, b) {
+                return parseInt(b.VersionNo, 10) - parseInt(a.VersionNo, 10);
+              });
+
+              var oLatest = aVersions[0] || null;
+
+              return {
+                // ── IDs (real GUIDs from BE) ──────────────────
+                id: reg.GroupId,
+                groupId: reg.GroupId,
+
+                // ── Display fields ────────────────────────────
+                name: reg.GroupName,
+                type: reg.GroupTypeText || reg.GroupType || "—",
+                prefix: (reg.GroupName || "").substring(0, 2),
+                status: reg.StatusText || reg.Status || "—",
+                is_deleted: reg.Status === "D",
+                owner: reg.RegisteredBy || "—",
+                description: reg.Description || "",
+                registeredAt: reg.RegisteredAt,
+                lastChangeAt: reg.LastChangeAt,
+
+                // ── Version counts ────────────────────────────
+                versionsCount: aVersions.length,
+                latestVersionNo: oLatest ? oLatest.VersionNo : "0",
+                latestVersionId: oLatest ? oLatest.VersionId : null,
+                latestDetailId:
+                  oLatest && oLatest._Detail && oLatest._Detail[0]
+                    ? oLatest._Detail[0].DetailId
+                    : null,
+
+                // ── All versions (mapped) ─────────────────────
+                versions: aVersions.map(function (v) {
+                  return {
+                    versionId: v.VersionId,
+                    groupId: v.GroupId,
+                    versionNo: v.VersionNo,
+                    hash: v.GroupHash || "",
+                    status: v.StatusText || v.Status || "—",
+                    createdBy: v.CreatedBy || "—",
+                    createdAt: v.CreatedAt,
+                    triggerType: v.TriggerType,
+                    triggerText: v.TriggerText || (v.TriggerType === "A" ? "Auto" : "Manual"),
+                    isLatest: v.LatestVersion === true,
+                    // First Detail's ID — used for XML fetch + Compare action
+                    detailId:
+                      v._Detail && v._Detail[0] ? v._Detail[0].DetailId : null,
+                  };
+                }),
+              };
+            });
+          },
+
+          /**
+           * Legacy entry point called by Component.js _initializeModel().
+           * Fetches Registry + maps to model; calls fnSuccess({ services }) on success.
+           *
+           * @param {Function} fnSuccess
+           * @param {Function} fnError
            */
           read: function (fnSuccess, fnError) {
-            if (sODataVersion === "v4") {
-              // V4: actual data arrives via list/context bindings in views.
-              if (fnSuccess) {
-                fnSuccess();
-              }
-            } else {
-              oModel.attachMetadataLoaded(function () {
-                if (fnSuccess) { fnSuccess(); }
-              });
-              oModel.attachMetadataFailed(function (oEvent) {
-                if (fnError) { fnError(oEvent); }
-              });
-            }
-          },
-
-          /**
-           * Create a new entity via OData
-           * @param {string} sEntitySet - Key from Config.ENTITY_SETS (e.g. "registry")
-           * @param {Object} oData      - Entity payload
-           * @param {Function} fnSuccess
-           * @param {Function} fnError
-           */
-          create: function (sEntitySet, oData, fnSuccess, fnError) {
-            var sPath = "/" + Config.getEntitySet(sEntitySet);
-            oModel.create(sPath, oData, {
-              success: fnSuccess,
-              error:   fnError,
-              async:   true,
-            });
-          },
-
-          /**
-           * Update an entity via OData
-           * @param {string} sEntitySet - Key from Config.ENTITY_SETS
-           * @param {string} sKey       - OData key predicate (e.g. "GroupId=guid'...'")
-           * @param {Object} oData      - Updated fields
-           * @param {Function} fnSuccess
-           * @param {Function} fnError
-           */
-          update: function (sEntitySet, sKey, oData, fnSuccess, fnError) {
-            var sPath = "/" + Config.getEntitySet(sEntitySet) + "(" + sKey + ")";
-            oModel.update(sPath, oData, {
-              success: fnSuccess,
-              error:   fnError,
-              async:   true,
-            });
-          },
-
-          /**
-           * Delete an entity via OData
-           * @param {string} sEntitySet - Key from Config.ENTITY_SETS
-           * @param {string} sKey       - OData key predicate
-           * @param {Function} fnSuccess
-           * @param {Function} fnError
-           */
-          delete: function (sEntitySet, sKey, fnSuccess, fnError) {
-            var sPath = "/" + Config.getEntitySet(sEntitySet) + "(" + sKey + ")";
-            oModel.remove(sPath, {
-              success: fnSuccess,
-              error:   fnError,
-              async:   true,
-            });
-          },
-
-          /**
-           * Query an entity set with optional OData URL parameters
-           * @param {string} sEntitySet - Key from Config.ENTITY_SETS
-           * @param {Object} oFilters   - OData URL params (e.g. $filter, $top, $expand)
-           * @param {Function} fnSuccess - Receives array of results
-           * @param {Function} fnError
-           */
-          query: function (sEntitySet, oFilters, fnSuccess, fnError) {
-            var sPath    = "/" + Config.getEntitySet(sEntitySet);
-            var oRequest = { urlParameters: oFilters, async: true };
-
-            oModel.read(sPath, {
-              ...oRequest,
-              success: function (oData) {
+            var that = this;
+            this.fetchRegistry()
+              .then(function (oData) {
+                var aServices = that.mapRegistryToServices(oData.value || []);
                 if (fnSuccess) {
-                  fnSuccess(oData.results || oData.value || oData);
+                  fnSuccess({ services: aServices });
                 }
-              },
-              error: fnError,
-            });
-          },
-
-          /**
-           * Get the underlying OData model (for direct view/list binding)
-           * @returns {sap.ui.model.odata.v4.ODataModel}
-           */
-          getModel: function () {
-            return oModel;
+              })
+              .catch(function (oError) {
+                console.error("[ODataService] fetchRegistry failed:", oError);
+                if (fnError) {
+                  fnError(oError);
+                }
+              });
           },
 
           /**
@@ -166,11 +269,11 @@ sap.ui.define(
            */
           getStatus: function () {
             return {
-              isOnline:     true,
-              isMock:       false,
-              backend:      sBackendUrl,
-              odataVersion: sODataVersion,
-              sapClient:    sSapClient,
+              isOnline: true,
+              isMock: false,
+              backend: sBaseUrl,
+              odataVersion: Config.ODATA_VERSION,
+              sapClient: sSapClient,
             };
           },
         };

@@ -137,29 +137,37 @@ sap.ui.define(
         var oModel = new JSONModel();
         this.setModel(oModel);
 
-        // Load data from service
+        // Seed model with base flags immediately so views render the shell
+        oModel.setData({
+          sapUser: SAPLoginService.getUsername(),
+          isBackend: Config.isBackendEnabled() && Config.AUTH_TYPE === "basic-per-user",
+          services: [],
+          loading: true
+        });
+
+        // Load real data from service (async)
         oDataService.read(
           function (oData) {
-            // Update model with data from service
-            if (oData) {
-              var oMergedData = Object.assign({
-                sapUser: SAPLoginService.getUsername(),
-                isBackend: Config.isBackendEnabled() && Config.AUTH_TYPE === "basic-per-user"
-              }, oData);
-              oModel.setData(oMergedData);
-            }
+            // IMPORTANT: use setProperty() not setData() for each field.
+            // setData() does NOT fire propertyChange events on JSONModel —
+            // only setProperty() does, which is what Dashboard.controller.js
+            // listens to in order to re-render the service list.
+            oModel.setProperty("/sapUser",    SAPLoginService.getUsername());
+            oModel.setProperty("/isBackend",  Config.isBackendEnabled() && Config.AUTH_TYPE === "basic-per-user");
+            oModel.setProperty("/services",   oData.services   || []);
+            oModel.setProperty("/loading",    false);
             console.log(
-              "[Component] Data service initialized:",
-              oStatus ? oStatus.backend : "Mock Data"
+              "[Component] Data loaded from:",
+              oStatus ? oStatus.backend : "Mock",
+              "·",
+              (oData.services || []).length,
+              "services"
             );
           },
           function (oError) {
-            console.error("[Component] Failed to load data:", oError);
-            // Fallback: empty model
-            oModel.setData({
-              sapUser: SAPLoginService.getUsername(),
-              isBackend: Config.isBackendEnabled() && Config.AUTH_TYPE === "basic-per-user"
-            });
+            console.error("[Component] Failed to load registry data:", oError);
+            oModel.setProperty("/loading",  false);
+            oModel.setProperty("/services", []);
           }
         );
       },
