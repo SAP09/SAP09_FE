@@ -38,16 +38,9 @@
                             <Text text="👤 Manual" class="badge badge-manual" />
                         </HBox>
                         <Select id="baseVersionSelect" change="onBaseVersionChange" class="versionSelect">
-                            <items>
-                                <core:Item key="v1" text="v1 — Auto · Sep 2024" />
-                                <core:Item key="v2" text="v2 — Auto · Oct 2024" />
-                                <core:Item key="v3" text="v3 — Manual · Dec 2024" />
-                                <core:Item key="v4" text="v4 — Auto · Jan 2025" />
-                                <core:Item key="v5" text="v5 — Manual · Feb 2025" />
-                                <core:Item key="v6" text="v6 — Auto · Mar 2025" />
-                                <core:Item key="v7" text="v7 — Auto · Today" />
-                            </items>
+                            <!-- items populated dynamically by VersionCompare.controller.js -->
                         </Select>
+
                         <Text text="JDOE · TR#K8X044 · SEGW: ZMM_PO_PROJ · 12 entities" id="baseVersionMeta" class="versionMeta" />
                     </VBox>
 
@@ -69,16 +62,9 @@
                             <Text text="🤖 Auto" class="badge badge-auto" />
                         </HBox>
                         <Select id="compareVersionSelect" change="onCompareVersionChange" class="versionSelect">
-                            <items>
-                                <core:Item key="v1" text="v1 — Auto · Sep 2024" />
-                                <core:Item key="v2" text="v2 — Auto · Oct 2024" />
-                                <core:Item key="v3" text="v3 — Manual · Dec 2024" />
-                                <core:Item key="v4" text="v4 — Auto · Jan 2025" />
-                                <core:Item key="v5" text="v5 — Manual · Feb 2025" />
-                                <core:Item key="v6" text="v6 — Auto · Mar 2025" />
-                                <core:Item key="v7" text="v7 — Auto · Today" />
-                            </items>
+                            <!-- items populated dynamically by VersionCompare.controller.js -->
                         </Select>
+
                         <Text text="SYSTEM · TR#K9A002 · App: ZMM_PURCHASE_UI · 14 entities" id="compareVersionMeta" class="versionMeta" />
                     </VBox>
                 </HBox>
@@ -216,7 +202,7 @@
                                 <Text text="v7 — compare" class="diffColHeader diffColHeader-right" />
                             </HBox>
 
-                            <ScrollContainer vertical="true" horizontal="false" class="xmlDiffScroll">
+                            <ScrollContainer vertical="true" horizontal="true" class="xmlDiffScroll">
                                 <VBox id="xmlDiffContainer" class="xmlDiffContainer" />
                             </ScrollContainer>
                         </IconTabFilter>
