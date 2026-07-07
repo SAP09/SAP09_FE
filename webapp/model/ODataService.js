@@ -61,14 +61,33 @@ sap.ui.define(
 
         /**
          * Fetch a CSRF token required for write operations.
+         * Tries the service root and falls back to $metadata if necessary.
          * @returns {Promise<string>} CSRF token value
          */
         function _getCsrfToken() {
-          return fetch(sBaseUrl + "/", {
-            method: "GET",
-            headers: _headers(true),
-          }).then(function (res) {
-            return res.headers.get("X-CSRF-Token") || "";
+          function fetchTokenFromUrl(sUrl, headers) {
+            return fetch(sUrl, {
+              method: "GET",
+              headers: headers,
+            }).then(function (res) {
+              var sToken = res.headers.get("X-CSRF-Token") || "";
+              return sToken;
+            });
+          }
+
+          var sBaseRoot = sBaseUrl.replace(/\/+$/, "") + "/";
+          var oHeaders = Object.assign({}, _headers(true), {
+            "OData-Version": "4.0",
+            "OData-MaxVersion": "4.0",
+            "Cache-Control": "no-cache",
+          });
+
+          return fetchTokenFromUrl(sBaseRoot, oHeaders).then(function (sToken) {
+            if (sToken) {
+              return sToken;
+            }
+            // Some services return CSRF headers only for metadata requests
+            return fetchTokenFromUrl(sBaseRoot + "$metadata", oHeaders);
           });
         }
 
@@ -81,7 +100,8 @@ sap.ui.define(
         function _post(sPath, oBody) {
           return _getCsrfToken().then(function (sToken) {
             var h = _headers(false);
-            h["Content-Type"] = "application/json";
+            h["Content-Type"] = "application/json;charset=UTF-8";
+            h["OData-Version"] = "4.0";
             if (sToken) {
               h["X-CSRF-Token"] = sToken;
             }
@@ -156,10 +176,25 @@ sap.ui.define(
            * @returns {Promise<ZDDETAILCOMPARERESULT>}
            */
           compareDetails: function (sDetailId, sCompareDetailId) {
-            return _post(
-              "/Detail(DetailId=" + sDetailId + ")/" + NAMESPACE + ".Compare",
-              { compare_detail_id: sCompareDetailId }
-            );
+            // Primary attempt: namespaced bound action
+            var sPrimary = "/Detail(DetailId=" + sDetailId + ")/" + NAMESPACE + ".Compare";
+            var sAltNoNs  = "/Detail(DetailId=" + sDetailId + ")/Compare";
+            var sAltLower = "/Detail(DetailId=" + sDetailId + ")/" + NAMESPACE + ".compare";
+
+            return _post(sPrimary, { compare_detail_id: sCompareDetailId }).catch(function (err) {
+              // If 404 / resource not found, try a couple of common alternate URIs
+              var msg = String(err || "");
+              if (msg.indexOf("HTTP 404") >= 0 || msg.indexOf("Resource not found") >= 0) {
+                console.warn("[ODataService] compareDetails: primary URI failed, trying alternate URIs.");
+                return _post(sAltNoNs, { compare_detail_id: sCompareDetailId })
+                  .catch(function (err2) {
+                    // final attempt with lowercase action name
+                    return _post(sAltLower, { compare_detail_id: sCompareDetailId });
+                  });
+              }
+              // Not a 404 — rethrow so caller can handle
+              throw err;
+            });
           },
 
           /**

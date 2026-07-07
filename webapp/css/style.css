@@ -290,10 +290,9 @@ body.sapUiBody {
    can overlap the page content in some layouts. Add extra top padding
    and allow visible overflow so HBox controls are not clipped. */
 .dashboardPage.sapMPageWithSubHeader .sapMPageCon {
-  /* Increase top padding to fully clear the top bar and subheader
-       so detail header/action buttons sit below and don't overlap. */
-  padding-top: 96px; /* increased space for top bar + subheader */
-  overflow: visible;
+  /* Keep top padding minimal — avoid absolute pixel hacks so the page
+     participates in the flex height chain. Do NOT force overflow here. */
+  padding-top: 0 !important;
 }
 
 /* Shell top bar should sit above page headers */
@@ -338,25 +337,47 @@ body.sapUiBody {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   DASHBOARD LAYOUT
-   ═══════════════════════════════════════════════════════════════ */
+  DASHBOARD LAYOUT — Flexible height chain (no hard-coded calcs)
+  Use a flex-based height chain so header/footer keep natural size and
+  content areas grow/shrink with viewport. Avoid pixel-based calc hacks.
+  ═══════════════════════════════════════════════════════════════ */
+
+/* Ensure the document and UI5 page roots participate in a flex height chain
+  so child areas can use flex:1 / min-height:0 for robust scrolling. */
+html,
+body,
+#content,
+.sapMPage {
+  height: 100% !important;
+}
+
+/* Make the page and its main content area flex columns so header /
+  subheader / content / footer stack correctly and content can flex. */
+.sapMPage,
+.sapMPage .sapMPageCon,
+.sapMPage section.sapMPageEnableScrolling {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+/* Do not force overflow on the root page container — let UI5 place the
+  footer and headers naturally. Only internal content areas should
+  control their own scrolling (service list, version scroll areas). */
 .dashboardPage .sapMPageCon {
-  overflow: visible !important;
   padding: 0 !important; /* Remove default page padding */
 }
 
-/* Ensure the UI5 scrolling container inside the dashboard does not get
-   absolutely positioned under the subheader. Make it relative and
-   visible so content (HBox) is shown and can be pushed down by headers. */
+/* Keep the UI5 scrolling wrapper positioned but do NOT force overflow
+  or pixel heights here; children will manage scrolling via flex. */
 .dashboardPage section.sapMPageEnableScrolling {
-  overflow: visible !important;
   position: relative !important;
   top: auto !important;
-  padding: 0 !important; /* Remove extra padding */
+  padding: 0 !important;
 }
 
 .mainBody {
-  min-height: 100%;
+  min-height: 0; /* allow flex children to shrink correctly */
   overflow: auto; /* Allow scrolling when content exceeds viewport */
   /* Ensure HBox children stretch to full height */
   align-items: stretch;
@@ -445,6 +466,7 @@ body.sapUiBody {
 .detailPanel {
   flex: 1;
   min-width: 0; /* Prevent flex item overflow */
+  min-height: 0; /* allow flex children to shrink correctly */
   overflow: hidden;
   background: #ffffff;
   display: flex;
@@ -579,6 +601,8 @@ body.sapUiBody {
 .versionScroll {
   flex: 1;
   min-height: 0; /* Important for proper flex child sizing */
+  overflow-y: auto; /* enable internal scrolling when content is long */
+  -webkit-overflow-scrolling: touch;
 }
 .versionList {
   padding: 12px 20px;
@@ -644,17 +668,53 @@ body.sapUiBody {
   font-size: 11px !important;
 }
 
+/* Ensure icon glyphs render inside the version action buttons (View / Compare) */
+.versionActions .sapMBtnIcon.sapUiIcon {
+  font-family: 'SAP-icons' !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
 /* Export footer */
 .exportFooterBar.sapMBar {
   background: #fafafa !important;
   border-top: 1px solid var(--omm-color-border-subtle) !important;
   padding: 6px 16px !important;
   min-height: 44px !important;
+  flex: 0 0 auto;
 }
 .exportFooterLabel.sapMText {
   font-size: 12px !important;
   color: var(--omm-color-text-secondary) !important;
   margin-left: 6px;
+}
+
+/* Ensure detail panel children reserve fixed space and only the
+   versionScroll grows/shrinks. This prevents long version lists from
+   pushing the footer out of view. */
+.detailPanel .kpiRow,
+.detailPanel .versionSectionHeader,
+.detailPanel .exportFooterBar,
+.detailPanel .versionFooter {
+  flex: 0 0 auto;
+}
+
+/* Override UI5 internal flex scroll wrappers inside the detail panel
+   so they participate correctly in the height chain and do not
+   expand to fit content (which would push the footer out). */
+.detailPanel .sapMFlexBoxScroll,
+.detailPanel .sapMFlexBoxBGTransparent.sapMFlexBoxScroll {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.detailPanel .sapMFlexBoxScroll > * {
+  min-height: 0 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -670,6 +730,28 @@ body.sapUiBody {
   flex-direction: column;
   align-items: stretch;
 }
+
+  /* Compare page fixes: prevent tab/content from overlapping footer/header */
+  .comparePage .compareTabBar,
+  .comparePage .sapMITBContent {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Ensure footer participates in flex flow (not absolutely positioned) */
+  .comparePage .sapMPageFooter {
+    position: relative !important;
+    z-index: auto !important;
+    flex: 0 0 auto !important;
+  }
+
+  /* Keep selector row separate from header to avoid visual overlap */
+  .comparePage .versionSelectorRow {
+    margin-top: 8px !important;
+    flex: 0 0 auto;
+  }
 
 /* Version selector row */
 .versionSelectorRow {
@@ -991,14 +1073,61 @@ body.sapUiBody {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 0 !important;
+  /* Ensure content starts below the header — header is ~52px high. */
+  padding-top: 56px !important;
+.versionDetailPage {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+}
+
+/* Ensure the immediate UI5 wrappers inside the page participate in the flex chain */
+.versionDetailPage .sapUiView,
+.versionDetailPage .sapMNav,
+.versionDetailPage > .sapMFlexBox,
+.versionDetailPage .sapMPageCon {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+/* Right/left panels inside the version detail should be flex columns */
+.versionDetailPage .detailTwoPanel,
+.versionDetailPage .versionRightPane,
+.versionDetailPage .entityTreePanel,
+.versionDetailPage .xmlOuterWrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.versionDetailPage .versionDetailBody {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+  margin-top: 0 !important;
+}
+
+.versionDetailPage .versionFooter,
+.versionDetailPage .sapMPageFooter {
+  position: relative !important;
+  flex: 0 0 auto !important;
+}
 }
 .versionDetailBody {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
-  overflow: hidden;
+  overflow: auto; /* allow internal scrolling */
   display: flex;
   flex-direction: column;
+  padding-bottom: 64px; /* reserve space for footer to avoid overlap */
+}
+
+/* Small offset so the detail body sits below the page header */
+.versionDetailBody {
+  margin-top: 16px !important;
 }
 .detailTwoPanel {
   flex: 1;
@@ -1049,7 +1178,8 @@ body.sapUiBody {
   /* Similar calc as versionDetailBody but allow for an extra header row
      inside the detail area; this ensures the two-panel layout has a
      deterministic height and children can use flex or 100% reliably. */
-  height: calc(100vh - 52px - 54px - 44px - 54px);
+  /* Use flex sizing instead of viewport-based absolute calc so the
+     panel adapts to header/footer size changes and viewport resizes. */
   overflow: hidden;
   display: flex;
   align-items: stretch;
@@ -1218,7 +1348,8 @@ body.sapUiBody {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  height: calc(100vh - 52px - 54px - 44px - 36px - 54px);
+  /* Prefer flex sizing; do not hard-code viewport pixel math which breaks
+     when header/footer heights change. Let parent flex chain determine height. */
   overflow: hidden;
   background: #fdfcfa;
 }
@@ -1457,6 +1588,20 @@ body.sapUiBody {
   padding: 6px 16px !important;
   min-height: 44px !important;
 }
+
+.versionFooter {
+  flex: 0 0 auto;
+}
+
+/* Ensure version/detail footers participate in the flex flow and sit
+   at the bottom of the content area instead of being absolutely positioned. */
+.versionDetailPage .sapMPageFooter,
+.versionDetailPage .versionFooter,
+.versionDetailPage .exportFooterBar {
+  position: relative !important;
+  z-index: auto !important;
+  flex: 0 0 auto !important;
+}
 .footerFileInfo.sapMText {
   font-size: 11px !important;
   color: var(--omm-color-text-secondary) !important;
@@ -1494,7 +1639,7 @@ body.sapUiBody {
 .versionDetailPage .detailTwoPanel.sapMHBox {
   flex-wrap: nowrap !important;
   align-items: stretch !important;
-  height: calc(100vh - 52px - 54px - 44px - 54px) !important;
+  /* Use flex-based sizing inherited from page chain; avoid absolute calc. */
 }
 .versionDetailPage .metaRow.sapMHBox {
   flex-wrap: wrap;

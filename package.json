@@ -16,11 +16,11 @@
     "start-mock": "fiori run --config ./ui5-mock.yaml --open \"test/flpSandbox.html?sap-ui-xx-viewCache=false#ODataMetadataManager-display\""
   },
   "devDependencies": {
-    "serve": "^14.2.4",
-    "@ui5/cli": "^4.0.0",
+    "@sap-ux/ui5-middleware-fe-mockserver": "2",
     "@sap/ux-ui5-tooling": "1",
+    "@ui5/cli": "^3.0.0",
     "rimraf": "6.0.1",
-    "@sap-ux/ui5-middleware-fe-mockserver": "2"
+    "serve": "^14.2.4"
   },
   "engines": {
     "node": ">=18"
